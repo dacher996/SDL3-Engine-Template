@@ -3,12 +3,19 @@
 
 #include "Core/app.h"
 #include "Core/app_context.h"
-#include "Core/logger.h"
+#include "Core/components.h"
+#include "Core/utils.h"
 
-#include "Core/app_event.h"
-#include "Core/layer_interface.h"
-#include "Core/scene_interface.h"
-
+#include "Layers/graphics_pipeline_manager.h"
 #include "Layers/scene_manager.h"
+#include "Layers/texture_manager.h"
+#include "Layers/texture_region_manager.h"
+#include "Layers/texture_sampler_manager.h"
 
-#endif //APP_ENGINE_ENGINE_H
+#include "Rendering/render_target_render_pass.h"
+
+#include "Rendering/2D/camera_2d.h"
+#include "Rendering/2D/renderer_2d.h"
+#include "Rendering/2D/shape_2d_batch.h"
+
+#endif // APP_ENGINE_ENGINE_H
