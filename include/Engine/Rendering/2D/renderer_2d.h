@@ -8,22 +8,22 @@
 #include "Engine/Rendering/storage_buffer.h"
 
 namespace Engine {
-    class Shape2DBatch; // Forward declaration
+    class Shape2DBatch;
 
     /// 2D sprite renderer that owns the GPU buffers (single source of truth) and
-/// orchestrates the full rendering pipeline: sorting, buffer upload, render
-/// pass execution, and final presentation to the swapchain.
-///
-/// The renderer is scene-agnostic — it accepts sprite data via Submit() and
-/// can be used by any data source (ECS scenes, UI layers, particle systems).
-///
-/// The rendering pipeline is customizable. By default it uses a 2-pass flow
-/// (offscreen sprite pass → swapchain presentation), but users can set a
-/// custom ordered list of content passes via SetRenderPipeline().
-///
-/// Multiple SpriteSubmissions can be submitted per frame for multi-view
-/// rendering (e.g. split-screen). Each submission carries its own view matrix
-/// and optional viewport/scissor configuration.
+    /// orchestrates the full rendering pipeline: sorting, buffer upload, render
+    /// pass execution, and final presentation to the swapchain.
+    ///
+    /// The renderer is scene-agnostic — it accepts sprite data via Submit() and
+    /// can be used by any data source (ECS scenes, UI layers, particle systems).
+    ///
+    /// The rendering pipeline is customizable. By default it uses a 2-pass flow
+    /// (offscreen sprite pass → swapchain presentation), but users can set a
+    /// custom ordered list of content passes via SetRenderPipeline().
+    ///
+    /// Multiple SpriteSubmissions can be submitted per frame for multi-view
+    /// rendering (e.g. split-screen). Each submission carries its own view matrix
+    /// and optional viewport/scissor configuration.
     class Renderer2D {
     public:
         /// Creates the renderer with the given offscreen render target dimensions.
@@ -81,7 +81,7 @@ namespace Engine {
 
         /// Current frame's render data containing all views
         FrameRenderData m_currentFrameData;
-        
+
         /// Pending submissions for the current frame
         std::vector<SpriteSubmission> m_pendingSubmissions;
 

@@ -27,12 +27,12 @@ namespace YourProject {
     // Submit regular sprites
     renderer.Submit(PrepareSprites());
 
-    // // Submit debug primitives
-    // Engine::Shape2DBatch shapeBatch(m_camera.GetViewMatrix());
-    // shapeBatch.DrawRectOutlined(10.0f, 10.0f, 100.0f, 100.0f, Engine::Color{255, 0, 0, 255}, 2.0f);
-    // shapeBatch.DrawLine(0.0f, 0.0f, 200.0f, 200.0f, Engine::Color{0, 255, 0, 255}, 3.0f);
-    // shapeBatch.DrawRect(300.0f, 300.0f, 50.0f, 50.0f, Engine::Color{0, 0, 255, 128}, 0.5f); // Rotating rect
-    // renderer.Submit(shapeBatch);
+    // Submit debug primitives
+    Engine::Shape2DBatch shapeBatch(m_camera.GetViewMatrix());
+    shapeBatch.DrawLine(96.0f, 96.f, 256.0f, 64.0f, Engine::Color{0, 255, 0, 255}, 3.0f);
+    shapeBatch.DrawRectOutlined(64.0f, 64.0f, 32.0f, 64.0f, Engine::Color{255, 0, 0, 255}, 2.0f);
+    shapeBatch.DrawRect(128.0f, 64.0f, 64.0f, 32.0f, Engine::Color{0, 0, 255, 128}, 0.5f);
+    renderer.Submit(shapeBatch);
 
     renderer.Present();
   }
@@ -112,8 +112,8 @@ namespace YourProject {
       entry.data.b = sprite.color.b;
       entry.data.a = sprite.color.a;
       entry.data.rotation = sprite.rotation;
-      entry.data.tex_u = texRegion->x;
-      entry.data.tex_v = texRegion->y;
+      entry.data.tex_x = texRegion->x;
+      entry.data.tex_y = texRegion->y;
       entry.data.tex_w = texRegion->w;
       entry.data.tex_h = texRegion->h;
       entry.data.textureLayerId = static_cast<float>(texRegion->layerId);

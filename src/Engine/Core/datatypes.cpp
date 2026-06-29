@@ -20,4 +20,20 @@ namespace Engine {
     Vec2f::operator SDL_FPoint() const { return SDL_FPoint(x, y); }
     Recti::operator SDL_Rect() const { return SDL_Rect({x, y, w, h}); }
     Rectf::operator SDL_FRect() const { return SDL_FRect({x, y, w, h}); }
+
+    bool Recti::IsIntersecting(const Recti &other) const {
+        SDL_Rect result;
+        SDL_Rect thisRect = *this;
+        SDL_Rect otherRect = other;
+
+        return SDL_GetRectIntersection(&thisRect, &otherRect, &result);
+    }
+
+    bool Rectf::IsIntersecting(const Rectf &other) const {
+        SDL_FRect result;
+        SDL_FRect thisRect = *this;
+        SDL_FRect otherRect = other;
+
+        return SDL_GetRectIntersectionFloat(&thisRect, &otherRect, &result);
+    }
 }

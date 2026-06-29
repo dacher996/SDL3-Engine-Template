@@ -23,6 +23,7 @@ namespace YourProject {
         void OnDestroy() override;
 
     protected:
+        /// Returns the active camera
         virtual Engine::Camera2D &GetCamera();
 
         /// Returns all visible entities

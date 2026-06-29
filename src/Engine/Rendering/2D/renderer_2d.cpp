@@ -160,8 +160,8 @@ namespace Engine {
           const auto &prev = entries[i - 1].data;
           const auto &curr = entries[i].data;
           if (curr.x == prev.x && curr.y == prev.y &&
-              curr.rotation == prev.rotation && curr.tex_u == prev.tex_u &&
-              curr.tex_v == prev.tex_v) {
+              curr.rotation == prev.rotation && curr.tex_x == prev.tex_x &&
+              curr.tex_y == prev.tex_y) {
             dataIndices[i] = dataIndices[i - 1];
           } else {
             dataIndices[i] =
@@ -309,7 +309,7 @@ namespace Engine {
       viewData.baseVertexIndex = cumulativeVertexIndex;
 
       // Viewport: use submission's custom viewport, or default to full render target
-      if (submissions[v].viewport.w > 0) {
+      if (submissions[v].viewport.w > 0 && submissions[v].viewport.h > 0) {
         viewData.viewport = submissions[v].viewport;
       } else {
         viewData.viewport = {
@@ -323,7 +323,7 @@ namespace Engine {
       }
 
       // Scissor: use submission's custom scissor, or default to full render target
-      if (submissions[v].scissor.w > 0) {
+      if (submissions[v].scissor.w > 0 && submissions[v].scissor.h > 0) {
         viewData.scissor = submissions[v].scissor;
       } else {
         viewData.scissor = {

@@ -19,8 +19,8 @@ namespace Engine {
         /// The layer within the texture where the sprite is located
         float textureLayerId;
 
-        /// The rect within the texture layer which will be drawn (x,y,width,height)
-        float tex_u, tex_v, tex_w, tex_h;
+        /// The rect (with normalized values) within the texture layer which will be drawn (x,y,width,height)
+        float tex_x, tex_y, tex_w, tex_h;
 
         /// Color applied to the output sprite
         float r, g, b, a;

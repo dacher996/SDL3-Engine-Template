@@ -8,12 +8,11 @@
 #include "SDL3/SDL_stdinc.h"
 
 namespace YourProject {
-    /// Parses an inhouse JSON format to extract texture regions.
+    /// Parses an in-house JSON format to extract texture regions.
     class InhouseSpritesheetParser : public Engine::TextureRegionParser {
     public:
-        /// Constructor
-        /// \param jsonPath Relative path to the JSON file (will be appended to SDL_GetBasePath())
-        /// \param textureId The ID of the texture this spritesheet belongs to
+        /// Parser that takes in the path to the json file containing the texture region data and the textureId
+        /// which represents the id of the texture registered inside the TextureManager
         InhouseSpritesheetParser(std::string jsonPath, Uint16 textureId);
 
         ~InhouseSpritesheetParser() override = default;

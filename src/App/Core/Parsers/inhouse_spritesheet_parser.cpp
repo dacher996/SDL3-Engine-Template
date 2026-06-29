@@ -14,11 +14,9 @@ namespace YourProject {
 
     std::vector<std::pair<Uint32, Engine::TextureRegion> > InhouseSpritesheetParser::Parse() {
         auto &ctx = Engine::App::GetLayer<AppContext>();
-
-        std::vector<std::pair<Uint32, Engine::TextureRegion> > regions;
-
         std::string fullPath = std::format("{}/assets/{}", ctx.basePath, m_jsonPath);
 
+        std::vector<std::pair<Uint32, Engine::TextureRegion> > regions;
         std::ifstream file(fullPath);
         if (!file.is_open()) {
             LOG_ERROR("InhouseSpritesheetParser: Failed to open JSON file: {0}", fullPath);

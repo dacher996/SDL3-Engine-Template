@@ -41,8 +41,8 @@ namespace Engine {
     entry.data.b = static_cast<float>(color.b);
     entry.data.a = static_cast<float>(color.a);
     entry.data.rotation = angle;
-    entry.data.tex_u = pixelRegion->x;
-    entry.data.tex_v = pixelRegion->y;
+    entry.data.tex_x = pixelRegion->x;
+    entry.data.tex_y = pixelRegion->y;
     entry.data.tex_w = pixelRegion->w;
     entry.data.tex_h = pixelRegion->h;
     entry.data.textureLayerId = static_cast<float>(pixelRegion->layerId);
@@ -67,7 +67,7 @@ namespace Engine {
         "Cannot draw primitive.");
       return;
     }
-    
+
     DrawTexture(x, y, w, h, pixelRegion, color, rotation, depth);
   }
 
@@ -109,8 +109,8 @@ namespace Engine {
     entry.data.b = static_cast<float>(color.b);
     entry.data.a = static_cast<float>(color.a);
     entry.data.rotation = rotation;
-    entry.data.tex_u = region->x;
-    entry.data.tex_v = region->y;
+    entry.data.tex_x = region->x;
+    entry.data.tex_y = region->y;
     entry.data.tex_w = region->w;
     entry.data.tex_h = region->h;
     entry.data.textureLayerId = static_cast<float>(region->layerId);

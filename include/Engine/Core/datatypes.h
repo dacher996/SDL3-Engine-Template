@@ -52,6 +52,8 @@ namespace Engine {
 
     template<typename T>
     struct Rect {
+        virtual ~Rect() = default;
+
         T x, y, w, h;
 
         Rect(Vec2<T> position, Vec2<T> size) : x(position.x), y(position.y), w(size.x), h(size.y) {
@@ -113,6 +115,8 @@ namespace Engine {
 
         operator SDL_Rect() const;
 
+        bool IsIntersecting(const Recti &other) const;
+
         static const Recti ZERO;
     };
 
@@ -120,6 +124,8 @@ namespace Engine {
         using Rect<float>::Rect;
 
         operator SDL_FRect() const;
+
+        bool IsIntersecting(const Rectf &other) const;
 
         static const Rectf ZERO;
     };
