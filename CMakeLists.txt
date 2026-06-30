@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.30)
 project(YourProject) # <--- Update this to change the name of your project
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 ########################################################################
 
@@ -26,46 +28,36 @@ set(SOURCES src/main.cpp
         src/App/Core/Parsers/inhouse_spritesheet_parser.cpp
 )
 
-# CPM
-file(
-        DOWNLOAD
-        https://github.com/cpm-cmake/CPM.cmake/releases/download/v0.38.3/CPM.cmake
-        ${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake
-        EXPECTED_HASH SHA256=cc155ce02e7945e7b8967ddfaff0b050e958a723ef7aad3766d368940cb15494
-)
-include(${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake)
-
-
 ########################################################################
 
 ## Dependencies
 
 ### SDL
-CPMAddPackage("gh:libsdl-org/SDL#c805a4d")
+find_package(SDL3 CONFIG REQUIRED)
 list(APPEND LIBS SDL3::SDL3)
 
 ### spdlog
-CPMAddPackage("gh:gabime/spdlog#a297670")
+find_package(spdlog CONFIG REQUIRED)
 list(APPEND LIBS spdlog::spdlog_header_only)
 
 # EnTT
-CPMAddPackage("gh:skypjack/entt@3.16.0")
+find_package(EnTT CONFIG REQUIRED)
 list(APPEND LIBS EnTT::EnTT)
 
 # SDL_image
-set(SDLIMAGE_AVIF OFF CACHE BOOL "" FORCE) # Requires Perl and Nasm for libaom (AVIF image format)
-CPMAddPackage("gh:libsdl-org/SDL_image#fcb9d0b")
+find_package(SDL3_image CONFIG REQUIRED)
 list(APPEND LIBS SDL3_image::SDL3_image)
 
 # GLM
-CPMAddPackage("gh:g-truc/glm#6f14f47")
+find_package(glm CONFIG REQUIRED)
 list(APPEND LIBS glm::glm)
 
 # nlohmann/json
-CPMAddPackage("gh:nlohmann/json@3.11.3")
+find_package(nlohmann_json CONFIG REQUIRED)
 list(APPEND LIBS nlohmann_json::nlohmann_json)
 
 ########################################################################
+
 
 ## Executables
 
@@ -88,13 +80,4 @@ target_compile_definitions(${PROJECT_NAME}
 set(ASSETS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/assets/output")
 set(ASSETS_DEST_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets")
 
-# Add a custom command to copy the assets directory
-add_custom_command(
-        OUTPUT "${ASSETS_DEST_DIR}"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${ASSETS_SOURCE_DIR}" "${ASSETS_DEST_DIR}"
-        COMMENT "Copying assets to output directory"
-)
-# Add a custom target that depends on the copy command
-add_custom_target(copy_assets ALL DEPENDS "${ASSETS_DEST_DIR}")
-
-set_property(DIRECTORY PROPERTY ADDITIONAL_CLEAN_FILES "${ASSETS_DEST_DIR}")
+file(COPY ${ASSETS_SOURCE_DIR} DESTINATION ${ASSETS_DEST_DIR})

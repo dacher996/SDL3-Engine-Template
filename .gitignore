@@ -69,6 +69,12 @@ compile_commands.json
 # vcpkg
 vcpkg_installed/
 
+# Ignore vcpkg's internal download caches and build artifacts
+vcpkg/downloads/
+vcpkg/buildtrees/
+vcpkg/packages/
+
+
 # debug information files
 *.dwo
 

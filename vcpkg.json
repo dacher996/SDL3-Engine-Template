@@ -1,0 +1,17 @@
+{
+  "name": "your-project",
+  "version-string": "0.0.1",
+  "dependencies": [
+    "glm",
+    "nlohmann-json",
+    "sdl3",
+    {
+      "name": "sdl3-image",
+      "features": [
+        "png"
+      ]
+    },
+    "spdlog",
+    "entt"
+  ]
+}

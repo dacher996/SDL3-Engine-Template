@@ -1,0 +1,75 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "base",
+      "binaryDir": "${sourceDir}/bin/build",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "./vcpkg/scripts/buildsystems/vcpkg.cmake"
+      }
+    },
+    {
+      "name": "windows-base",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build/bin/win",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "vendor": {
+        "jetbrains.com/clion": {
+          "toolchain": "Default"
+        }
+      }
+    },
+    {
+      "name": "macOS-base",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build/bin/macOS",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      },
+      "vendor": {
+        "jetbrains.com/clion": {
+          "toolchain": "Default"
+        }
+      }
+    },
+    {
+      "name": "windows-debug",
+      "inherits": "windows-base",
+      "binaryDir": "${sourceDir}/build/bin/win/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "windows-release",
+      "inherits": "windows-base",
+      "binaryDir": "${sourceDir}/build/bin/win/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "macOS-debug",
+      "inherits": "macOS-base",
+      "binaryDir": "${sourceDir}/build/bin/macOS/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "macOS-release",
+      "inherits": "macOS-base",
+      "binaryDir": "${sourceDir}/build/bin/macOS/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ]
+}
