@@ -4,12 +4,15 @@
 #include "Engine/Core/app.h"
 #include "Engine/Core/components.h"
 #include "Engine/Core/logger.h"
+#include "Engine/Layers/material_manager.h"
 #include "Engine/Layers/texture_region_manager.h"
 #include "Engine/Rendering/2D/renderer_2d.h"
 #include "Engine/Rendering/2D/shape_2d_batch.h"
 #include <format>
 
-#include "Engine/Layers/material_manager.h"
+#if USE_IMGUI
+#include "imgui.h"
+#endif
 
 namespace YourProject {
   Scene2D::Scene2D() : Scene2D(Engine::Camera2D()) {
@@ -28,6 +31,10 @@ namespace YourProject {
 
     // Submit regular sprites
     renderer.Submit(PrepareSprites());
+
+#if USE_IMGUI
+    ImGui::ShowDemoWindow();
+#endif
 
     // Submit debug primitives
     // Engine::Shape2DBatch shapeBatch(m_camera.GetViewMatrix());
