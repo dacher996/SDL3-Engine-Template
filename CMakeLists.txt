@@ -19,7 +19,6 @@ file(GLOB_RECURSE ENGINE_SOURCES
 
 set(SOURCES src/main.cpp
         ${ENGINE_SOURCES}
-        include/App/Core/components.h
         include/App/Scenes/initial_scene.h
         src/App/Scenes/initial_scene.cpp
         include/App/Scenes/scene_2d.h

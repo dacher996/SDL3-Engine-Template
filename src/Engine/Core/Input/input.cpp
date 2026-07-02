@@ -1,11 +1,10 @@
-#include "Engine/Core/input.h"
+#include "Engine/Core/Input/input.h"
 #include "Engine/Core/app.h"
 #include "Engine/Layers/input_manager.h"
 
 namespace Engine {
-
-    static InputManager& GetInputManager() {
-        return App::Get().GetLayer<InputManager>();
+    static InputManager &GetInputManager() {
+        return App::GetLayer<InputManager>();
     }
 
     bool Input::IsActionPressed(ActionID actionID, int gamepadIndex) {
@@ -84,7 +83,7 @@ namespace Engine {
         return GetInputManager().GetInputText();
     }
 
-    void Input::BindAction(ActionID actionID, const InputChord& chord) {
+    void Input::BindAction(ActionID actionID, const InputChord &chord) {
         GetInputManager().BindAction(actionID, chord);
     }
 
@@ -111,5 +110,4 @@ namespace Engine {
     void Input::StopGamepadRumble(int gamepadIndex) {
         GetInputManager().StopGamepadRumble(gamepadIndex);
     }
-
 }
