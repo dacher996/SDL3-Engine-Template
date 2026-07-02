@@ -1,14 +1,10 @@
 #include "App/Scenes/scene_2d.h"
 
-#include "App/Core/components.h"
 #include "Engine/Core/app.h"
 #include "Engine/Core/components.h"
-#include "Engine/Core/logger.h"
-#include "Engine/Layers/material_manager.h"
-#include "Engine/Layers/texture_region_manager.h"
 #include "Engine/Rendering/2D/renderer_2d.h"
-#include "Engine/Rendering/2D/shape_2d_batch.h"
-#include <format>
+#include "Engine/Rendering/2D/sprite_helper.h"
+#include "Engine/Systems/animation_system.h"
 
 #if USE_IMGUI
 #include "imgui.h"
@@ -24,6 +20,7 @@ namespace YourProject {
   Scene2D::~Scene2D() = default;
 
   void Scene2D::Update(float dt) {
+    Engine::AnimationSystem::Update(&m_registry, dt);
   }
 
   void Scene2D::Render() {
@@ -38,10 +35,11 @@ namespace YourProject {
 
     // Submit debug primitives
     // Engine::Shape2DBatch shapeBatch(m_camera.GetViewMatrix());
-    // shapeBatch.DrawLine(96.0f, 96.f, 256.0f, 64.0f, Engine::Color{0, 255, 0, 255}, 3.0f);
-    // shapeBatch.DrawRectOutlined(64.0f, 64.0f, 32.0f, 64.0f, Engine::Color{255, 0, 0, 255}, 2.0f);
-    // shapeBatch.DrawRect(128.0f, 64.0f, 64.0f, 32.0f, Engine::Color{0, 0, 255, 128}, 0.5f);
-    // renderer.Submit(shapeBatch);
+    // shapeBatch.DrawLine(96.0f, 96.f, 256.0f, 64.0f, Engine::Color{0, 255, 0,
+    // 255}, 3.0f); shapeBatch.DrawRectOutlined(64.0f, 64.0f, 32.0f, 64.0f,
+    // Engine::Color{255, 0, 0, 255}, 2.0f);
+    // shapeBatch.DrawRect(128.0f, 64.0f, 64.0f, 32.0f, Engine::Color{0, 0, 255,
+    // 128}, 0.5f); renderer.Submit(shapeBatch);
 
     renderer.Present();
   }
@@ -58,6 +56,7 @@ namespace YourProject {
     return GetVisibleEntities(Engine::Rectf::ZERO);
   }
 
+
   std::vector<Engine::Entity> Scene2D::GetVisibleEntities(Engine::Rectf padding) {
     std::vector<entt::entity> ents;
     SDL_FRect result;
@@ -72,9 +71,9 @@ namespace YourProject {
     // Ideally, we'd want only to retrieve objects that are in the region of the
     // camera rather than iterating over every entity. A good case would be to use
     // a QuadTree or a hybrid approach.
-    m_registry.view<Engine::Position, Engine::Size, Sprite>().each(
+    m_registry.view<Engine::Position, Engine::Size, Engine::Sprite>().each(
       [&](Engine::Entity entity, Engine::Position pos, Engine::Size size,
-          Sprite _) {
+          Engine::Sprite _) {
         SDL_FRect rect{
           pos.x, pos.y, static_cast<float>(size.x),
           static_cast<float>(size.y)
@@ -92,57 +91,6 @@ namespace YourProject {
   }
 
   Engine::SpriteSubmission Scene2D::PrepareSprites(Engine::Camera2D &camera) {
-    auto visible = GetVisibleEntities();
-
-    Engine::SpriteSubmission submission;
-    submission.entries.reserve(
-      static_cast<size_t>(static_cast<float>(visible.size()) * 1.2f));
-    submission.viewMatrix = camera.GetViewMatrix();
-    auto &regionManager = Engine::App::GetLayer<Engine::TextureRegionManager>();
-    auto defaultMaterial = Engine::App::GetLayer<Engine::MaterialManager>().GetDefaultMaterial();
-
-    for (auto entityId: visible) {
-      const auto &pos = m_registry.get<Engine::Position>(entityId);
-      const auto &size = m_registry.get<Engine::Size>(entityId);
-      const auto &sprite = m_registry.get<Sprite>(entityId);
-      auto texRegion = regionManager.GetRegion(sprite.spriteId);
-      if (!texRegion) {
-        LOG_WARN(std::format("No texture region with key '{}' found.",
-          sprite.spriteId));
-        continue;
-      }
-
-      Engine::SpriteEntry entry{};
-      entry.data.x = pos.x;
-      entry.data.y = pos.y;
-      entry.data.w = static_cast<float>(size.x);
-      entry.data.h = static_cast<float>(size.y);
-      entry.data.r = sprite.color.r;
-      entry.data.g = sprite.color.g;
-      entry.data.b = sprite.color.b;
-      entry.data.a = sprite.color.a;
-      entry.data.rotation = sprite.rotation;
-      entry.data.tex_x = texRegion->x;
-      entry.data.tex_y = texRegion->y;
-      entry.data.tex_w = texRegion->w;
-      entry.data.tex_h = texRegion->h;
-      entry.data.textureLayerId = static_cast<float>(texRegion->layerId);
-      entry.depth = static_cast<Uint16>(pos.z);
-
-      // Entities with material components produce one entry per material
-      if (const auto *materialComp = m_registry.try_get<Engine::MaterialComponent>(entityId);
-        materialComp && !materialComp->materialIds.empty()) {
-        for (auto mid: materialComp->materialIds) {
-          entry.materialId = mid;
-          submission.entries.push_back(entry);
-        }
-      } else {
-        // If no material component attached, use the default material
-        entry.materialId = defaultMaterial->id;
-        submission.entries.push_back(entry);
-      }
-    }
-
-    return submission;
+    return Engine::GetSpriteSubmission(&m_registry, camera, GetVisibleEntities());
   }
 } // namespace YourProject

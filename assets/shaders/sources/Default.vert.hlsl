@@ -2,7 +2,7 @@ struct SpriteData
 {
     float2 Position;
     float2 Scale;
-    float2 Padding;
+    float2 Origin;
     float Rotation;
     float TexId;
     float TexU, TexV, TexW, TexH;
@@ -58,6 +58,7 @@ Output main(uint id : SV_VertexID)
     float s = sin(sprite.Rotation);
 
     float2 coord = vertexPos[vert];
+    coord -= sprite.Origin;
     coord *= sprite.Scale;
     float2x2 rotation = {c, s, -s, c};
     coord = mul(coord, rotation);

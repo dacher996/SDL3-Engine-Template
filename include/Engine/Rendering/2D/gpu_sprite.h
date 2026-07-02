@@ -10,8 +10,8 @@ namespace Engine {
         /// The size of the final output when drawing the sprite
         float w, h;
 
-        /// Padding included to comply with std140's 16-byte alignment
-        float padding_a, padding_b;
+        /// Origin for rotation and scaling
+        float origin_x, origin_y;
 
         /// Angle at which the sprite is rendered
         float rotation;
