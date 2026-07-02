@@ -1,10 +1,12 @@
 #include "Engine/Layers/input_manager.h"
+
 #include "Engine/Core/app.h"
+#include "Engine/Core/app_context.h"
 #include "Engine/Core/logger.h"
 #include "Engine/Layers/scene_manager.h"
-#include "Engine/Core/app_context.h"
 #include "SDL3/SDL_joystick.h"
 #include "SDL3/SDL_mouse.h"
+
 #include <algorithm>
 #include <cmath>
 
@@ -63,7 +65,7 @@ namespace Engine {
     m_mouseDeltaY = m_accumMouseDeltaY;
     m_scrollDeltaX = m_accumScrollX;
     m_scrollDeltaY = m_accumScrollY;
-    
+
     m_accumMouseDeltaX = 0.0f;
     m_accumMouseDeltaY = 0.0f;
     m_accumScrollX = 0.0f;
@@ -113,7 +115,8 @@ namespace Engine {
                       if (IsMouseButtonPressed(std::get<MouseCode>(binding.code)))
                         bindingActive = true;
                       {
-                        auto m_it = m_mouseStates.find(std::get<MouseCode>(binding.code));
+                        auto m_it =
+                            m_mouseStates.find(std::get<MouseCode>(binding.code));
                         if (m_it != m_mouseStates.end() &&
                             (m_it->second.pressed || m_it->second.held))
                           bindingActive = true;
@@ -128,14 +131,17 @@ namespace Engine {
                     }
                     break;
                     case InputDeviceType::GamepadAxis: {
-                      GamepadAxisCode axisCode = std::get<GamepadAxisCode>(binding.code);
+                      GamepadAxisCode axisCode =
+                          std::get<GamepadAxisCode>(binding.code);
                       float axisVal = GetGamepadAxis(axisCode, gpadIdx);
 
-                      if (axisCode == Gamepad::AxisLeftX || axisCode == Gamepad::AxisLeftY ||
-                          axisCode == Gamepad::AxisRightX || axisCode == Gamepad::AxisRightY) {
-                        
+                      if (axisCode == Gamepad::AxisLeftX ||
+                          axisCode == Gamepad::AxisLeftY ||
+                          axisCode == Gamepad::AxisRightX ||
+                          axisCode == Gamepad::AxisRightY) {
                         float x = 0.0f, y = 0.0f;
-                        if (axisCode == Gamepad::AxisLeftX || axisCode == Gamepad::AxisLeftY) {
+                        if (axisCode == Gamepad::AxisLeftX ||
+                            axisCode == Gamepad::AxisLeftY) {
                           x = GetGamepadAxis(Gamepad::AxisLeftX, gpadIdx);
                           y = GetGamepadAxis(Gamepad::AxisLeftY, gpadIdx);
                         } else {
@@ -146,10 +152,13 @@ namespace Engine {
                         float magnitude = std::sqrt(x * x + y * y);
                         if (magnitude >= binding.deadzone) {
                           bindingActive = true;
-                          
+
                           float normalizedMag = 0.0f;
                           if (binding.deadzone < 1.0f) {
-                            normalizedMag = std::clamp((magnitude - binding.deadzone) / (1.0f - binding.deadzone), 0.0f, 1.0f);
+                            normalizedMag =
+                                std::clamp((magnitude - binding.deadzone) /
+                                           (1.0f - binding.deadzone),
+                                           0.0f, 1.0f);
                           }
 
                           float scaledAxis = (axisVal / magnitude) * normalizedMag;
@@ -190,13 +199,13 @@ namespace Engine {
             if (isActive && !wasActive) {
               state.pressed = true;
               state.released = false;
-              App::GetLayer<SceneManager>().OnEvent(
-                static_cast<AppEvent>(ActionPressedEvent(actPair.first, gpadIdx)));
+              App::GetLayer<SceneManager>().OnEvent(static_cast<AppEvent>(
+                ActionPressedEvent(actPair.first, gpadIdx)));
             } else if (!isActive && wasActive) {
               state.pressed = false;
               state.released = true;
-              App::GetLayer<SceneManager>().OnEvent(
-                static_cast<AppEvent>(ActionReleasedEvent(actPair.first, gpadIdx)));
+              App::GetLayer<SceneManager>().OnEvent(static_cast<AppEvent>(
+                ActionReleasedEvent(actPair.first, gpadIdx)));
             }
 
             state.axisValue = highestAxis;
@@ -257,28 +266,33 @@ namespace Engine {
           }
           case SDL_EVENT_GAMEPAD_BUTTON_DOWN: {
             int gpadIdx = m_joystickToGamepadIndex[event->gbutton.which];
-            GetGamepadButtonState(gpadIdx, (GamepadCode) event->gbutton.button).pressed =
-                true;
+            GetGamepadButtonState(gpadIdx, (GamepadCode) event->gbutton.button)
+                .pressed = true;
             GetGamepadButtonState(gpadIdx, (GamepadCode) event->gbutton.button)
                 .released = false;
-            GetGamepadButtonState(gpadIdx, (GamepadCode) event->gbutton.button).held =
-                false;
+            GetGamepadButtonState(gpadIdx, (GamepadCode) event->gbutton.button)
+                .held = false;
             break;
           }
           case SDL_EVENT_GAMEPAD_BUTTON_UP: {
             int gpadIdx = m_joystickToGamepadIndex[event->gbutton.which];
-            GetGamepadButtonState(gpadIdx, static_cast<GamepadCode>(event->gbutton.button))
+            GetGamepadButtonState(gpadIdx,
+                                  static_cast<GamepadCode>(event->gbutton.button))
                 .released = true;
-            GetGamepadButtonState(gpadIdx, static_cast<GamepadCode>(event->gbutton.button)).pressed =
-                false;
-            GetGamepadButtonState(gpadIdx, static_cast<GamepadCode>(event->gbutton.button)).held =
-                false;
+            GetGamepadButtonState(gpadIdx,
+                                  static_cast<GamepadCode>(event->gbutton.button))
+                .pressed = false;
+            GetGamepadButtonState(gpadIdx,
+                                  static_cast<GamepadCode>(event->gbutton.button))
+                .held = false;
             break;
           }
           case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
             int gpadIdx = m_joystickToGamepadIndex[event->gaxis.which];
-            float val = event->gaxis.value / 32767.0f; // roughly normalize to -1.0 to 1.0
-            m_gamepadAxes[gpadIdx][static_cast<GamepadAxisCode>(event->gaxis.axis)] = val;
+            float val =
+                event->gaxis.value / 32767.0f; // roughly normalize to -1.0 to 1.0
+            m_gamepadAxes[gpadIdx]
+                [static_cast<GamepadAxisCode>(event->gaxis.axis)] = val;
             break;
           }
           default: ;
@@ -296,7 +310,8 @@ namespace Engine {
           int gpadIdx = m_nextGamepadIndex++;
           m_joystickToGamepadIndex[joystickID] = gpadIdx;
           ENGINE_LOG_INFO("Gamepad added: Index {}", gpadIdx);
-          App::GetLayer<SceneManager>().OnEvent(static_cast<AppEvent>(GamepadConnectedEvent(gpadIdx)));
+          App::GetLayer<SceneManager>().OnEvent(
+            static_cast<AppEvent>(GamepadConnectedEvent(gpadIdx)));
 
           // Initialize action states for this gamepad
           for (const auto &pair: m_actionBindings) {
@@ -314,7 +329,8 @@ namespace Engine {
           int gpadIdx = m_joystickToGamepadIndex[joystickID];
           m_joystickToGamepadIndex.erase(joystickID);
           ENGINE_LOG_INFO("Gamepad removed: Index {}", gpadIdx);
-          App::GetLayer<SceneManager>().OnEvent(static_cast<AppEvent>(GamepadDisconnectedEvent(gpadIdx)));
+          App::GetLayer<SceneManager>().OnEvent(
+            static_cast<AppEvent>(GamepadDisconnectedEvent(gpadIdx)));
         }
       }
 
@@ -328,8 +344,8 @@ namespace Engine {
         return m_mouseStates[button];
       }
 
-      InputManager::InputState &
-          InputManager::GetGamepadButtonState(int index, GamepadCode button)
+      InputManager::InputState &InputManager::GetGamepadButtonState(
+        int index, GamepadCode button)
       {
         return m_gamepadButtonStates[index][button];
       }
@@ -409,23 +425,28 @@ namespace Engine {
         SDL_WarpMouseInWindow(window, x, y);
       }
 
-      void InputManager::StartTextInput() const {
+      void InputManager::StartTextInput() const
+      {
         SDL_Window *window = App::GetLayer<AppContext>().window;
         SDL_StartTextInput(window);
       }
 
-      void InputManager::StopTextInput() const {
+      void InputManager::StopTextInput() const
+      {
         SDL_Window *window = App::GetLayer<AppContext>().window;
         SDL_StopTextInput(window);
       }
 
-      std::string InputManager::GetInputText() const {
+      std::string InputManager::GetInputText() const
+      {
         return m_inputText;
       }
 
-      bool InputManager::IsActionPressed(ActionID actionID, int gamepadIndex) const
+      bool InputManager::IsActionPressed(ActionID actionID, int gamepadIndex)
+          const
       {
-        if (auto it1 = m_actionStates.find(gamepadIndex); it1 != m_actionStates.end()) {
+        if (auto it1 = m_actionStates.find(gamepadIndex);
+          it1 != m_actionStates.end()) {
           if (auto it2 = it1->second.find(actionID); it2 != it1->second.end())
             return it2->second.pressed;
         }
@@ -434,25 +455,30 @@ namespace Engine {
 
       bool InputManager::IsActionHeld(ActionID actionID, int gamepadIndex) const
       {
-        if (auto it1 = m_actionStates.find(gamepadIndex); it1 != m_actionStates.end()) {
+        if (auto it1 = m_actionStates.find(gamepadIndex);
+          it1 != m_actionStates.end()) {
           if (auto it2 = it1->second.find(actionID); it2 != it1->second.end())
             return it2->second.held || it2->second.pressed;
         }
         return false;
       }
 
-      bool InputManager::IsActionReleased(ActionID actionID, int gamepadIndex) const
+      bool InputManager::IsActionReleased(ActionID actionID, int gamepadIndex)
+          const
       {
-        if (auto it1 = m_actionStates.find(gamepadIndex); it1 != m_actionStates.end()) {
+        if (auto it1 = m_actionStates.find(gamepadIndex);
+          it1 != m_actionStates.end()) {
           if (auto it2 = it1->second.find(actionID); it2 != it1->second.end())
             return it2->second.released;
         }
         return false;
       }
 
-      float InputManager::GetActionAxis(ActionID actionID, int gamepadIndex) const
+      float InputManager::GetActionAxis(ActionID actionID, int gamepadIndex)
+          const
       {
-        if (auto it1 = m_actionStates.find(gamepadIndex); it1 != m_actionStates.end()) {
+        if (auto it1 = m_actionStates.find(gamepadIndex);
+          it1 != m_actionStates.end()) {
           if (auto it2 = it1->second.find(actionID); it2 != it1->second.end())
             return it2->second.axisValue;
         }
@@ -485,51 +511,61 @@ namespace Engine {
       bool InputManager::IsGamepadButtonPressed(GamepadCode button,
                                                 int gamepadIndex) const
       {
-        if (auto it1 = m_gamepadButtonStates.find(gamepadIndex); it1 != m_gamepadButtonStates.end()) {
+        if (auto it1 = m_gamepadButtonStates.find(gamepadIndex);
+          it1 != m_gamepadButtonStates.end()) {
           if (auto it2 = it1->second.find(button); it2 != it1->second.end())
             return it2->second.pressed;
         }
         return false;
       }
 
-      float InputManager::GetGamepadAxis(GamepadAxisCode axis,
-                                         int gamepadIndex) const
+      float InputManager::GetGamepadAxis(GamepadAxisCode axis, int gamepadIndex)
+          const
       {
-        if (auto it1 = m_gamepadAxes.find(gamepadIndex); it1 != m_gamepadAxes.end()) {
+        if (auto it1 = m_gamepadAxes.find(gamepadIndex);
+          it1 != m_gamepadAxes.end()) {
           if (auto it2 = it1->second.find(axis); it2 != it1->second.end())
             return it2->second;
         }
         return 0.0f;
       }
 
-      void InputManager::RumbleGamepad(int gamepadIndex, float lowFrequency, float highFrequency,
-                                       Uint32 durationMs) const
+      void InputManager::RumbleGamepad(int gamepadIndex, float lowFrequency,
+                                       float highFrequency, Uint32 durationMs)
+          const
       {
         for (const auto &pair: m_joystickToGamepadIndex) {
           if (pair.second == gamepadIndex) {
             auto it = m_gamepads.find(pair.first);
             if (it != m_gamepads.end()) {
-              SDL_RumbleGamepad(it->second,
-                                static_cast<Uint16>(std::clamp(lowFrequency, 0.0f, 1.0f) * 0xFFFF),
-                                static_cast<Uint16>(std::clamp(highFrequency, 0.0f, 1.0f) * 0xFFFF),
-                                durationMs);
+              SDL_RumbleGamepad(
+                it->second,
+                static_cast<Uint16>(std::clamp(lowFrequency, 0.0f, 1.0f) *
+                                    0xFFFF),
+                static_cast<Uint16>(std::clamp(highFrequency, 0.0f, 1.0f) *
+                                    0xFFFF),
+                durationMs);
             }
             break;
           }
         }
       }
 
-      void InputManager::RumbleGamepadTriggers(int gamepadIndex, float leftRumble, float rightRumble,
+      void InputManager::RumbleGamepadTriggers(int gamepadIndex, float leftRumble,
+                                               float rightRumble,
                                                Uint32 durationMs) const
       {
         for (const auto &pair: m_joystickToGamepadIndex) {
           if (pair.second == gamepadIndex) {
             auto it = m_gamepads.find(pair.first);
             if (it != m_gamepads.end()) {
-              SDL_RumbleGamepadTriggers(it->second,
-                                        static_cast<Uint16>(std::clamp(leftRumble, 0.0f, 1.0f) * 0xFFFF),
-                                        static_cast<Uint16>(std::clamp(rightRumble, 0.0f, 1.0f) * 0xFFFF),
-                                        durationMs);
+              SDL_RumbleGamepadTriggers(
+                it->second,
+                static_cast<Uint16>(std::clamp(leftRumble, 0.0f, 1.0f) *
+                                    0xFFFF),
+                static_cast<Uint16>(std::clamp(rightRumble, 0.0f, 1.0f) *
+                                    0xFFFF),
+                durationMs);
             }
             break;
           }
