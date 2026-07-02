@@ -52,7 +52,7 @@ namespace Engine {
       updateState(pair.second);
     for (auto &gamepadPair: m_gamepadButtonStates) {
       for (auto &btnPair: gamepadPair.second) {
-        updateState(btnPair);
+        updateState(btnPair.second);
       }
     }
     for (auto &gamepadPair: m_actionStates) {
@@ -212,369 +212,339 @@ namespace Engine {
           }
         }
       }
+    }
+  }
 
-      bool InputManager::HandleEvent(SDL_Event *event)
-      {
-        switch (event->type) {
-          case SDL_EVENT_KEY_DOWN: {
-            if (!event->key.repeat) {
-              GetKeyState(event->key.scancode).pressed = true;
-              GetKeyState(event->key.scancode).released = false;
-              GetKeyState(event->key.scancode).held = false;
-            }
-            break;
-          }
-          case SDL_EVENT_KEY_UP: {
-            GetKeyState(event->key.scancode).released = true;
-            GetKeyState(event->key.scancode).pressed = false;
-            GetKeyState(event->key.scancode).held = false;
-            break;
-          }
-          case SDL_EVENT_MOUSE_BUTTON_DOWN: {
-            GetMouseState(event->button.button).pressed = true;
-            GetMouseState(event->button.button).released = false;
-            GetMouseState(event->button.button).held = false;
-            break;
-          }
-          case SDL_EVENT_MOUSE_BUTTON_UP: {
-            GetMouseState(event->button.button).released = true;
-            GetMouseState(event->button.button).pressed = false;
-            GetMouseState(event->button.button).held = false;
-            break;
-          }
-          case SDL_EVENT_MOUSE_MOTION: {
-            m_accumMouseDeltaX += event->motion.xrel;
-            m_accumMouseDeltaY += event->motion.yrel;
-            break;
-          }
-          case SDL_EVENT_MOUSE_WHEEL: {
-            m_accumScrollX += event->wheel.x;
-            m_accumScrollY += event->wheel.y;
-            break;
-          }
-          case SDL_EVENT_TEXT_INPUT: {
-            m_accumInputText += event->text.text;
-            break;
-          }
-          case SDL_EVENT_GAMEPAD_ADDED: {
-            AddGamepad(event->gdevice.which);
-            break;
-          }
-          case SDL_EVENT_GAMEPAD_REMOVED: {
-            RemoveGamepad(event->gdevice.which);
-            break;
-          }
-          case SDL_EVENT_GAMEPAD_BUTTON_DOWN: {
-            int gpadIdx = m_joystickToGamepadIndex[event->gbutton.which];
-            GetGamepadButtonState(gpadIdx, (GamepadCode) event->gbutton.button)
-                .pressed = true;
-            GetGamepadButtonState(gpadIdx, (GamepadCode) event->gbutton.button)
-                .released = false;
-            GetGamepadButtonState(gpadIdx, (GamepadCode) event->gbutton.button)
-                .held = false;
-            break;
-          }
-          case SDL_EVENT_GAMEPAD_BUTTON_UP: {
-            int gpadIdx = m_joystickToGamepadIndex[event->gbutton.which];
-            GetGamepadButtonState(gpadIdx,
-                                  static_cast<GamepadCode>(event->gbutton.button))
-                .released = true;
-            GetGamepadButtonState(gpadIdx,
-                                  static_cast<GamepadCode>(event->gbutton.button))
-                .pressed = false;
-            GetGamepadButtonState(gpadIdx,
-                                  static_cast<GamepadCode>(event->gbutton.button))
-                .held = false;
-            break;
-          }
-          case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
-            int gpadIdx = m_joystickToGamepadIndex[event->gaxis.which];
-            float val =
-                event->gaxis.value / 32767.0f; // roughly normalize to -1.0 to 1.0
-            m_gamepadAxes[gpadIdx]
-                [static_cast<GamepadAxisCode>(event->gaxis.axis)] = val;
-            break;
-          }
-          default: ;
+  bool InputManager::HandleEvent(SDL_Event *event) {
+    switch (event->type) {
+      case SDL_EVENT_KEY_DOWN: {
+        if (!event->key.repeat) {
+          GetKeyState(event->key.scancode).pressed = true;
+          GetKeyState(event->key.scancode).released = false;
+          GetKeyState(event->key.scancode).held = false;
         }
-        return false;
+        break;
       }
-
-      void InputManager::AddGamepad(SDL_JoystickID joystickID)
-      {
-        if (m_gamepads.find(joystickID) != m_gamepads.end())
-          return;
-        SDL_Gamepad *gamepad = SDL_OpenGamepad(joystickID);
-        if (gamepad) {
-          m_gamepads[joystickID] = gamepad;
-          int gpadIdx = m_nextGamepadIndex++;
-          m_joystickToGamepadIndex[joystickID] = gpadIdx;
-          ENGINE_LOG_INFO("Gamepad added: Index {}", gpadIdx);
-          App::GetLayer<SceneManager>().OnEvent(
-            static_cast<AppEvent>(GamepadConnectedEvent(gpadIdx)));
-
-          // Initialize action states for this gamepad
-          for (const auto &pair: m_actionBindings) {
-            m_actionStates[gpadIdx][pair.first] = InputState{};
-          }
-        }
+      case SDL_EVENT_KEY_UP: {
+        GetKeyState(event->key.scancode).released = true;
+        GetKeyState(event->key.scancode).pressed = false;
+        GetKeyState(event->key.scancode).held = false;
+        break;
       }
+      case SDL_EVENT_MOUSE_BUTTON_DOWN: {
+        GetMouseState(event->button.button).pressed = true;
+        GetMouseState(event->button.button).released = false;
+        GetMouseState(event->button.button).held = false;
+        break;
+      }
+      case SDL_EVENT_MOUSE_BUTTON_UP: {
+        GetMouseState(event->button.button).released = true;
+        GetMouseState(event->button.button).pressed = false;
+        GetMouseState(event->button.button).held = false;
+        break;
+      }
+      case SDL_EVENT_MOUSE_MOTION: {
+        m_accumMouseDeltaX += event->motion.xrel;
+        m_accumMouseDeltaY += event->motion.yrel;
+        break;
+      }
+      case SDL_EVENT_MOUSE_WHEEL: {
+        m_accumScrollX += event->wheel.x;
+        m_accumScrollY += event->wheel.y;
+        break;
+      }
+      case SDL_EVENT_TEXT_INPUT: {
+        m_accumInputText += event->text.text;
+        break;
+      }
+      case SDL_EVENT_GAMEPAD_ADDED: {
+        AddGamepad(event->gdevice.which);
+        break;
+      }
+      case SDL_EVENT_GAMEPAD_REMOVED: {
+        RemoveGamepad(event->gdevice.which);
+        break;
+      }
+      case SDL_EVENT_GAMEPAD_BUTTON_DOWN: {
+        int gpadIdx = m_joystickToGamepadIndex[event->gbutton.which];
+        GetGamepadButtonState(gpadIdx, (GamepadCode) event->gbutton.button)
+            .pressed = true;
+        GetGamepadButtonState(gpadIdx, (GamepadCode) event->gbutton.button)
+            .released = false;
+        GetGamepadButtonState(gpadIdx, (GamepadCode) event->gbutton.button)
+            .held = false;
+        break;
+      }
+      case SDL_EVENT_GAMEPAD_BUTTON_UP: {
+        int gpadIdx = m_joystickToGamepadIndex[event->gbutton.which];
+        GetGamepadButtonState(gpadIdx,
+                              static_cast<GamepadCode>(event->gbutton.button))
+            .released = true;
+        GetGamepadButtonState(gpadIdx,
+                              static_cast<GamepadCode>(event->gbutton.button))
+            .pressed = false;
+        GetGamepadButtonState(gpadIdx,
+                              static_cast<GamepadCode>(event->gbutton.button))
+            .held = false;
+        break;
+      }
+      case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
+        int gpadIdx = m_joystickToGamepadIndex[event->gaxis.which];
+        float val =
+            event->gaxis.value / 32767.0f; // roughly normalize to -1.0 to 1.0
+        m_gamepadAxes[gpadIdx]
+            [static_cast<GamepadAxisCode>(event->gaxis.axis)] = val;
+        break;
+      }
+      default: ;
+    }
+    return false;
+  }
 
-      void InputManager::RemoveGamepad(SDL_JoystickID joystickID)
-      {
-        auto it = m_gamepads.find(joystickID);
+  void InputManager::AddGamepad(SDL_JoystickID joystickID) {
+    if (m_gamepads.find(joystickID) != m_gamepads.end())
+      return;
+    SDL_Gamepad *gamepad = SDL_OpenGamepad(joystickID);
+    if (gamepad) {
+      m_gamepads[joystickID] = gamepad;
+      int gpadIdx = m_nextGamepadIndex++;
+      m_joystickToGamepadIndex[joystickID] = gpadIdx;
+      ENGINE_LOG_INFO("Gamepad added: Index {}", gpadIdx);
+      App::GetLayer<SceneManager>().OnEvent(
+        static_cast<AppEvent>(GamepadConnectedEvent(gpadIdx)));
+
+      // Initialize action states for this gamepad
+      for (const auto &pair: m_actionBindings) {
+        m_actionStates[gpadIdx][pair.first] = InputState{};
+      }
+    }
+  }
+
+  void InputManager::RemoveGamepad(SDL_JoystickID joystickID) {
+    auto it = m_gamepads.find(joystickID);
+    if (it != m_gamepads.end()) {
+      SDL_CloseGamepad(it->second);
+      m_gamepads.erase(it);
+      int gpadIdx = m_joystickToGamepadIndex[joystickID];
+      m_joystickToGamepadIndex.erase(joystickID);
+      ENGINE_LOG_INFO("Gamepad removed: Index {}", gpadIdx);
+      App::GetLayer<SceneManager>().OnEvent(
+        static_cast<AppEvent>(GamepadDisconnectedEvent(gpadIdx)));
+    }
+  }
+
+  InputManager::InputState &InputManager::GetKeyState(KeyCode key) {
+    return m_keyStates[key];
+  }
+
+  InputManager::InputState &InputManager::GetMouseState(MouseCode button) {
+    return m_mouseStates[button];
+  }
+
+  InputManager::InputState &InputManager::GetGamepadButtonState(
+    int index, GamepadCode button) {
+    return m_gamepadButtonStates[index][button];
+  }
+
+  void InputManager::BindAction(ActionID actionID, const InputChord &chord) {
+    m_actionBindings[actionID].push_back(chord);
+    // Ensure action state exists for gamepad 0 (keyboard/mouse primary)
+    m_actionStates[0][actionID] = InputState{};
+    for (const auto &pair: m_gamepads) {
+      m_actionStates[m_joystickToGamepadIndex[pair.first]][actionID] =
+          InputState{};
+    }
+  }
+
+  void InputManager::UnbindAction(ActionID actionID) {
+    m_actionBindings.erase(actionID);
+  }
+
+  void InputManager::ClearAllBindings() {
+    m_actionBindings.clear();
+  }
+
+  bool InputManager::IsActionBound(ActionID actionID) const {
+    auto it = m_actionBindings.find(actionID);
+    return it != m_actionBindings.end() && !it->second.empty();
+  }
+
+  Vec2f InputManager::GetMousePosition() const {
+    float x, y;
+    SDL_GetMouseState(&x, &y);
+    return Vec2f(x, y);
+  }
+
+  Vec2f InputManager::GetGlobalMousePosition() const {
+    float x, y;
+    SDL_GetGlobalMouseState(&x, &y);
+    return Vec2f(x, y);
+  }
+
+  Vec2f InputManager::GetMouseDelta() const {
+    return Vec2f(m_mouseDeltaX, m_mouseDeltaY);
+  }
+
+  Vec2f InputManager::GetMouseScrollDelta() const {
+    return Vec2f(m_scrollDeltaX, m_scrollDeltaY);
+  }
+
+  void InputManager::SetCursorMode(CursorMode mode) const {
+    SDL_Window *window = App::GetLayer<AppContext>().window;
+    switch (mode) {
+      case CursorMode::Normal:
+        SDL_ShowCursor();
+        SDL_SetWindowRelativeMouseMode(window, false);
+        break;
+      case CursorMode::Hidden:
+        SDL_HideCursor();
+        SDL_SetWindowRelativeMouseMode(window, false);
+        break;
+      case CursorMode::Locked:
+        SDL_SetWindowRelativeMouseMode(window, true);
+        break;
+    }
+  }
+
+  void InputManager::SetCursorPosition(float x, float y) const {
+    SDL_Window *window = App::GetLayer<AppContext>().window;
+    SDL_WarpMouseInWindow(window, x, y);
+  }
+
+  void InputManager::StartTextInput() const {
+    SDL_Window *window = App::GetLayer<AppContext>().window;
+    SDL_StartTextInput(window);
+  }
+
+  void InputManager::StopTextInput() const {
+    SDL_Window *window = App::GetLayer<AppContext>().window;
+    SDL_StopTextInput(window);
+  }
+
+  std::string InputManager::GetInputText() const {
+    return m_inputText;
+  }
+
+  bool InputManager::IsActionPressed(ActionID actionID, int gamepadIndex)
+  const {
+    if (auto it1 = m_actionStates.find(gamepadIndex);
+      it1 != m_actionStates.end()) {
+      if (auto it2 = it1->second.find(actionID); it2 != it1->second.end())
+        return it2->second.pressed;
+    }
+    return false;
+  }
+
+  bool InputManager::IsActionHeld(ActionID actionID, int gamepadIndex) const {
+    if (auto it1 = m_actionStates.find(gamepadIndex);
+      it1 != m_actionStates.end()) {
+      if (auto it2 = it1->second.find(actionID); it2 != it1->second.end())
+        return it2->second.held || it2->second.pressed;
+    }
+    return false;
+  }
+
+  bool InputManager::IsActionReleased(ActionID actionID, int gamepadIndex)
+  const {
+    if (auto it1 = m_actionStates.find(gamepadIndex);
+      it1 != m_actionStates.end()) {
+      if (auto it2 = it1->second.find(actionID); it2 != it1->second.end())
+        return it2->second.released;
+    }
+    return false;
+  }
+
+  float InputManager::GetActionAxis(ActionID actionID, int gamepadIndex)
+  const {
+    if (auto it1 = m_actionStates.find(gamepadIndex);
+      it1 != m_actionStates.end()) {
+      if (auto it2 = it1->second.find(actionID); it2 != it1->second.end())
+        return it2->second.axisValue;
+    }
+    return 0.0f;
+  }
+
+  bool InputManager::IsKeyPressed(KeyCode key) const {
+    auto it = m_keyStates.find(key);
+    return it != m_keyStates.end() && it->second.pressed;
+  }
+
+  bool InputManager::IsKeyHeld(KeyCode key) const {
+    auto it = m_keyStates.find(key);
+    return it != m_keyStates.end() && (it->second.held || it->second.pressed);
+  }
+
+  bool InputManager::IsModifierHeld(KeyCode modifier) const {
+    return IsKeyHeld(modifier);
+  }
+
+  bool InputManager::IsMouseButtonPressed(MouseCode button) const {
+    auto it = m_mouseStates.find(button);
+    return it != m_mouseStates.end() && it->second.pressed;
+  }
+
+  bool InputManager::IsGamepadButtonPressed(GamepadCode button,
+                                            int gamepadIndex) const {
+    if (auto it1 = m_gamepadButtonStates.find(gamepadIndex);
+      it1 != m_gamepadButtonStates.end()) {
+      if (auto it2 = it1->second.find(button); it2 != it1->second.end())
+        return it2->second.pressed;
+    }
+    return false;
+  }
+
+  float InputManager::GetGamepadAxis(GamepadAxisCode axis, int gamepadIndex)
+  const {
+    if (auto it1 = m_gamepadAxes.find(gamepadIndex);
+      it1 != m_gamepadAxes.end()) {
+      if (auto it2 = it1->second.find(axis); it2 != it1->second.end())
+        return it2->second;
+    }
+    return 0.0f;
+  }
+
+  void InputManager::RumbleGamepad(int gamepadIndex, float lowFrequency,
+                                   float highFrequency, Uint32 durationMs)
+  const {
+    for (const auto &pair: m_joystickToGamepadIndex) {
+      if (pair.second == gamepadIndex) {
+        auto it = m_gamepads.find(pair.first);
         if (it != m_gamepads.end()) {
-          SDL_CloseGamepad(it->second);
-          m_gamepads.erase(it);
-          int gpadIdx = m_joystickToGamepadIndex[joystickID];
-          m_joystickToGamepadIndex.erase(joystickID);
-          ENGINE_LOG_INFO("Gamepad removed: Index {}", gpadIdx);
-          App::GetLayer<SceneManager>().OnEvent(
-            static_cast<AppEvent>(GamepadDisconnectedEvent(gpadIdx)));
+          SDL_RumbleGamepad(
+            it->second,
+            static_cast<Uint16>(std::clamp(lowFrequency, 0.0f, 1.0f) *
+                                0xFFFF),
+            static_cast<Uint16>(std::clamp(highFrequency, 0.0f, 1.0f) *
+                                0xFFFF),
+            durationMs);
         }
+        break;
       }
+    }
+  }
 
-      InputManager::InputState &InputManager::GetKeyState(KeyCode key)
-      {
-        return m_keyStates[key];
-      }
-
-      InputManager::InputState &InputManager::GetMouseState(MouseCode button)
-      {
-        return m_mouseStates[button];
-      }
-
-      InputManager::InputState &InputManager::GetGamepadButtonState(
-        int index, GamepadCode button)
-      {
-        return m_gamepadButtonStates[index][button];
-      }
-
-      void InputManager::BindAction(ActionID actionID, const InputChord &chord)
-      {
-        m_actionBindings[actionID].push_back(chord);
-        // Ensure action state exists for gamepad 0 (keyboard/mouse primary)
-        m_actionStates[0][actionID] = InputState{};
-        for (const auto &pair: m_gamepads) {
-          m_actionStates[m_joystickToGamepadIndex[pair.first]][actionID] =
-              InputState{};
+  void InputManager::RumbleGamepadTriggers(int gamepadIndex, float leftRumble,
+                                           float rightRumble,
+                                           Uint32 durationMs) const {
+    for (const auto &pair: m_joystickToGamepadIndex) {
+      if (pair.second == gamepadIndex) {
+        auto it = m_gamepads.find(pair.first);
+        if (it != m_gamepads.end()) {
+          SDL_RumbleGamepadTriggers(
+            it->second,
+            static_cast<Uint16>(std::clamp(leftRumble, 0.0f, 1.0f) *
+                                0xFFFF),
+            static_cast<Uint16>(std::clamp(rightRumble, 0.0f, 1.0f) *
+                                0xFFFF),
+            durationMs);
         }
+        break;
       }
+    }
+  }
 
-      void InputManager::UnbindAction(ActionID actionID)
-      {
-        m_actionBindings.erase(actionID);
-      }
-
-      void InputManager::ClearAllBindings()
-      {
-        m_actionBindings.clear();
-      }
-
-      bool InputManager::IsActionBound(ActionID actionID) const
-      {
-        auto it = m_actionBindings.find(actionID);
-        return it != m_actionBindings.end() && !it->second.empty();
-      }
-
-      Vec2f InputManager::GetMousePosition() const
-      {
-        float x, y;
-        SDL_GetMouseState(&x, &y);
-        return Vec2f(x, y);
-      }
-
-      Vec2f InputManager::GetGlobalMousePosition() const
-      {
-        float x, y;
-        SDL_GetGlobalMouseState(&x, &y);
-        return Vec2f(x, y);
-      }
-
-      Vec2f InputManager::GetMouseDelta() const
-      {
-        return Vec2f(m_mouseDeltaX, m_mouseDeltaY);
-      }
-
-      Vec2f InputManager::GetMouseScrollDelta() const
-      {
-        return Vec2f(m_scrollDeltaX, m_scrollDeltaY);
-      }
-
-      void InputManager::SetCursorMode(CursorMode mode) const
-      {
-        SDL_Window *window = App::GetLayer<AppContext>().window;
-        switch (mode) {
-          case CursorMode::Normal:
-            SDL_ShowCursor();
-            SDL_SetWindowRelativeMouseMode(window, false);
-            break;
-          case CursorMode::Hidden:
-            SDL_HideCursor();
-            SDL_SetWindowRelativeMouseMode(window, false);
-            break;
-          case CursorMode::Locked:
-            SDL_SetWindowRelativeMouseMode(window, true);
-            break;
-        }
-      }
-
-      void InputManager::SetCursorPosition(float x, float y) const
-      {
-        SDL_Window *window = App::GetLayer<AppContext>().window;
-        SDL_WarpMouseInWindow(window, x, y);
-      }
-
-      void InputManager::StartTextInput() const
-      {
-        SDL_Window *window = App::GetLayer<AppContext>().window;
-        SDL_StartTextInput(window);
-      }
-
-      void InputManager::StopTextInput() const
-      {
-        SDL_Window *window = App::GetLayer<AppContext>().window;
-        SDL_StopTextInput(window);
-      }
-
-      std::string InputManager::GetInputText() const
-      {
-        return m_inputText;
-      }
-
-      bool InputManager::IsActionPressed(ActionID actionID, int gamepadIndex)
-          const
-      {
-        if (auto it1 = m_actionStates.find(gamepadIndex);
-          it1 != m_actionStates.end()) {
-          if (auto it2 = it1->second.find(actionID); it2 != it1->second.end())
-            return it2->second.pressed;
-        }
-        return false;
-      }
-
-      bool InputManager::IsActionHeld(ActionID actionID, int gamepadIndex) const
-      {
-        if (auto it1 = m_actionStates.find(gamepadIndex);
-          it1 != m_actionStates.end()) {
-          if (auto it2 = it1->second.find(actionID); it2 != it1->second.end())
-            return it2->second.held || it2->second.pressed;
-        }
-        return false;
-      }
-
-      bool InputManager::IsActionReleased(ActionID actionID, int gamepadIndex)
-          const
-      {
-        if (auto it1 = m_actionStates.find(gamepadIndex);
-          it1 != m_actionStates.end()) {
-          if (auto it2 = it1->second.find(actionID); it2 != it1->second.end())
-            return it2->second.released;
-        }
-        return false;
-      }
-
-      float InputManager::GetActionAxis(ActionID actionID, int gamepadIndex)
-          const
-      {
-        if (auto it1 = m_actionStates.find(gamepadIndex);
-          it1 != m_actionStates.end()) {
-          if (auto it2 = it1->second.find(actionID); it2 != it1->second.end())
-            return it2->second.axisValue;
-        }
-        return 0.0f;
-      }
-
-      bool InputManager::IsKeyPressed(KeyCode key) const
-      {
-        auto it = m_keyStates.find(key);
-        return it != m_keyStates.end() && it->second.pressed;
-      }
-
-      bool InputManager::IsKeyHeld(KeyCode key) const
-      {
-        auto it = m_keyStates.find(key);
-        return it != m_keyStates.end() && (it->second.held || it->second.pressed);
-      }
-
-      bool InputManager::IsModifierHeld(KeyCode modifier) const
-      {
-        return IsKeyHeld(modifier);
-      }
-
-      bool InputManager::IsMouseButtonPressed(MouseCode button) const
-      {
-        auto it = m_mouseStates.find(button);
-        return it != m_mouseStates.end() && it->second.pressed;
-      }
-
-      bool InputManager::IsGamepadButtonPressed(GamepadCode button,
-                                                int gamepadIndex) const
-      {
-        if (auto it1 = m_gamepadButtonStates.find(gamepadIndex);
-          it1 != m_gamepadButtonStates.end()) {
-          if (auto it2 = it1->second.find(button); it2 != it1->second.end())
-            return it2->second.pressed;
-        }
-        return false;
-      }
-
-      float InputManager::GetGamepadAxis(GamepadAxisCode axis, int gamepadIndex)
-          const
-      {
-        if (auto it1 = m_gamepadAxes.find(gamepadIndex);
-          it1 != m_gamepadAxes.end()) {
-          if (auto it2 = it1->second.find(axis); it2 != it1->second.end())
-            return it2->second;
-        }
-        return 0.0f;
-      }
-
-      void InputManager::RumbleGamepad(int gamepadIndex, float lowFrequency,
-                                       float highFrequency, Uint32 durationMs)
-          const
-      {
-        for (const auto &pair: m_joystickToGamepadIndex) {
-          if (pair.second == gamepadIndex) {
-            auto it = m_gamepads.find(pair.first);
-            if (it != m_gamepads.end()) {
-              SDL_RumbleGamepad(
-                it->second,
-                static_cast<Uint16>(std::clamp(lowFrequency, 0.0f, 1.0f) *
-                                    0xFFFF),
-                static_cast<Uint16>(std::clamp(highFrequency, 0.0f, 1.0f) *
-                                    0xFFFF),
-                durationMs);
-            }
-            break;
-          }
-        }
-      }
-
-      void InputManager::RumbleGamepadTriggers(int gamepadIndex, float leftRumble,
-                                               float rightRumble,
-                                               Uint32 durationMs) const
-      {
-        for (const auto &pair: m_joystickToGamepadIndex) {
-          if (pair.second == gamepadIndex) {
-            auto it = m_gamepads.find(pair.first);
-            if (it != m_gamepads.end()) {
-              SDL_RumbleGamepadTriggers(
-                it->second,
-                static_cast<Uint16>(std::clamp(leftRumble, 0.0f, 1.0f) *
-                                    0xFFFF),
-                static_cast<Uint16>(std::clamp(rightRumble, 0.0f, 1.0f) *
-                                    0xFFFF),
-                durationMs);
-            }
-            break;
-          }
-        }
-      }
-
-      void InputManager::StopGamepadRumble(int gamepadIndex) const
-      {
-        RumbleGamepad(gamepadIndex, 0.0f, 0.0f, 0);
-        RumbleGamepadTriggers(gamepadIndex, 0.0f, 0.0f, 0);
-      }
-    } // namespace Engine
+  void InputManager::StopGamepadRumble(int gamepadIndex) const {
+    RumbleGamepad(gamepadIndex, 0.0f, 0.0f, 0);
+    RumbleGamepadTriggers(gamepadIndex, 0.0f, 0.0f, 0);
+  }
+} // namespace Engine

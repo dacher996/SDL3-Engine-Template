@@ -35,18 +35,18 @@ namespace Engine {
 
 #else
 
-#define ENGINE_LOG_TRACE
-#define ENGINE_LOG_INFO
-#define ENGINE_LOG_WARN
-#define ENGINE_LOG_ERROR
-#define ENGINE_LOG_CRITICAL
-#define ENGINE_LOG_SDL_ERROR
+#define ENGINE_LOG_TRACE(...)
+#define ENGINE_LOG_INFO(...)
+#define ENGINE_LOG_WARN(...)
+#define ENGINE_LOG_ERROR(...)
+#define ENGINE_LOG_CRITICAL(...)
+#define ENGINE_LOG_SDL_ERROR(msg)
 
-#define LOG_TRACE
-#define LOG_INFO
-#define LOG_WARN
-#define LOG_ERROR
-#define LOG_CRITICAL
+#define LOG_TRACE(...)
+#define LOG_INFO(...)
+#define LOG_WARN(...)
+#define LOG_ERROR(...)
+#define LOG_CRITICAL(...)
 
 #endif
 

@@ -5,9 +5,9 @@
 #include "Engine/Core/mouse_codes.h"
 #include "Engine/Core/gamepad_codes.h"
 #include <variant>
+#include <vector>
 
 namespace Engine {
-
     using ActionID = Uint32;
 
     enum class InputDeviceType {
@@ -23,20 +23,32 @@ namespace Engine {
         float deadzone = 0.1f; // For Gamepad Axis
 
         // Convenience constructors
-        InputBinding(KeyCode key) : deviceType(InputDeviceType::Keyboard), code(key) {}
-        InputBinding(MouseCode mouseBtn, bool isMouse = true) : deviceType(InputDeviceType::MouseButton), code(mouseBtn) {}
-        InputBinding(GamepadCode gpBtn) : deviceType(InputDeviceType::GamepadButton), code(gpBtn) {}
-        InputBinding(GamepadAxisCode gpAxis, float axisDeadzone = 0.1f) : deviceType(InputDeviceType::GamepadAxis), code(gpAxis), deadzone(axisDeadzone) {}
+        InputBinding(KeyCode key) : deviceType(InputDeviceType::Keyboard), code(key) {
+        }
+
+        InputBinding(MouseCode mouseBtn, bool isMouse = true) : deviceType(InputDeviceType::MouseButton),
+                                                                code(mouseBtn) {
+        }
+
+        InputBinding(GamepadCode gpBtn) : deviceType(InputDeviceType::GamepadButton), code(gpBtn) {
+        }
+
+        InputBinding(GamepadAxisCode gpAxis, float axisDeadzone = 0.1f) : deviceType(InputDeviceType::GamepadAxis),
+                                                                          code(gpAxis), deadzone(axisDeadzone) {
+        }
     };
 
     struct InputChord {
         std::vector<InputBinding> bindings;
 
         InputChord() = default;
-        InputChord(const InputBinding& binding) { bindings.push_back(binding); }
-        InputChord(std::initializer_list<InputBinding> list) : bindings(list) {}
 
-        void AddBinding(const InputBinding& binding) { bindings.push_back(binding); }
+        InputChord(const InputBinding &binding) { bindings.push_back(binding); }
+
+        InputChord(std::initializer_list<InputBinding> list) : bindings(list) {
+        }
+
+        void AddBinding(const InputBinding &binding) { bindings.push_back(binding); }
     };
 
     enum class CursorMode {
@@ -44,6 +56,5 @@ namespace Engine {
         Hidden,
         Locked
     };
-
 }
 #endif //ENGINE_INPUT_TYPES_H
