@@ -72,6 +72,18 @@ namespace Engine {
         GetInputManager().SetCursorPosition(x, y);
     }
 
+    void Input::StartTextInput() {
+        GetInputManager().StartTextInput();
+    }
+
+    void Input::StopTextInput() {
+        GetInputManager().StopTextInput();
+    }
+
+    std::string Input::GetInputText() {
+        return GetInputManager().GetInputText();
+    }
+
     void Input::BindAction(ActionID actionID, const InputChord& chord) {
         GetInputManager().BindAction(actionID, chord);
     }

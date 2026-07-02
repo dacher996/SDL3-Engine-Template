@@ -7,6 +7,7 @@
 #include "SDL3/SDL_events.h"
 #include <unordered_map>
 #include <vector>
+#include <string>
 
 namespace Engine {
 
@@ -38,6 +39,11 @@ namespace Engine {
         Vec2f GetMouseScrollDelta() const;
         void SetCursorMode(CursorMode mode) const;
         void SetCursorPosition(float x, float y) const;
+
+        // Text Input
+        void StartTextInput() const;
+        void StopTextInput() const;
+        std::string GetInputText() const;
 
         // Binding Management
         void BindAction(ActionID actionID, const InputChord& chord);
@@ -82,6 +88,9 @@ namespace Engine {
         float m_mouseDeltaY = 0.0f;
         float m_scrollDeltaX = 0.0f;
         float m_scrollDeltaY = 0.0f;
+
+        std::string m_inputText;
+        std::string m_accumInputText;
 
         // Opened SDL Gamepads
         std::unordered_map<SDL_JoystickID, SDL_Gamepad*> m_gamepads;

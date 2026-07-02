@@ -6,6 +6,7 @@
 #include "SDL3/SDL_joystick.h"
 #include "SDL3/SDL_mouse.h"
 #include <algorithm>
+#include <cmath>
 
 namespace Engine {
   InputManager::InputManager() {
@@ -62,11 +63,14 @@ namespace Engine {
     m_mouseDeltaY = m_accumMouseDeltaY;
     m_scrollDeltaX = m_accumScrollX;
     m_scrollDeltaY = m_accumScrollY;
-
+    
     m_accumMouseDeltaX = 0.0f;
     m_accumMouseDeltaY = 0.0f;
     m_accumScrollX = 0.0f;
     m_accumScrollY = 0.0f;
+
+    m_inputText = m_accumInputText;
+    m_accumInputText.clear();
   }
 
   void InputManager::EvaluateActions() {
@@ -124,12 +128,43 @@ namespace Engine {
                     }
                     break;
                     case InputDeviceType::GamepadAxis: {
-                      float axis = GetGamepadAxis(std::get<GamepadAxisCode>(binding.code),
-                                                  gpadIdx);
-                      if (std::abs(axis) >= binding.deadzone) {
-                        bindingActive = true;
-                        if (std::abs(axis) > std::abs(chordAxis))
-                          chordAxis = axis;
+                      GamepadAxisCode axisCode = std::get<GamepadAxisCode>(binding.code);
+                      float axisVal = GetGamepadAxis(axisCode, gpadIdx);
+
+                      if (axisCode == Gamepad::AxisLeftX || axisCode == Gamepad::AxisLeftY ||
+                          axisCode == Gamepad::AxisRightX || axisCode == Gamepad::AxisRightY) {
+                        
+                        float x = 0.0f, y = 0.0f;
+                        if (axisCode == Gamepad::AxisLeftX || axisCode == Gamepad::AxisLeftY) {
+                          x = GetGamepadAxis(Gamepad::AxisLeftX, gpadIdx);
+                          y = GetGamepadAxis(Gamepad::AxisLeftY, gpadIdx);
+                        } else {
+                          x = GetGamepadAxis(Gamepad::AxisRightX, gpadIdx);
+                          y = GetGamepadAxis(Gamepad::AxisRightY, gpadIdx);
+                        }
+
+                        float magnitude = std::sqrt(x * x + y * y);
+                        if (magnitude >= binding.deadzone) {
+                          bindingActive = true;
+                          
+                          float normalizedMag = 0.0f;
+                          if (binding.deadzone < 1.0f) {
+                            normalizedMag = std::clamp((magnitude - binding.deadzone) / (1.0f - binding.deadzone), 0.0f, 1.0f);
+                          }
+
+                          float scaledAxis = (axisVal / magnitude) * normalizedMag;
+                          if (std::abs(scaledAxis) > std::abs(chordAxis)) {
+                            chordAxis = scaledAxis;
+                          }
+                        }
+                      } else {
+                        // Triggers don't need radial deadzones
+                        if (std::abs(axisVal) >= binding.deadzone) {
+                          bindingActive = true;
+                          if (std::abs(axisVal) > std::abs(chordAxis)) {
+                            chordAxis = axisVal;
+                          }
+                        }
                       }
                     }
                     break;
@@ -206,6 +241,10 @@ namespace Engine {
           case SDL_EVENT_MOUSE_WHEEL: {
             m_accumScrollX += event->wheel.x;
             m_accumScrollY += event->wheel.y;
+            break;
+          }
+          case SDL_EVENT_TEXT_INPUT: {
+            m_accumInputText += event->text.text;
             break;
           }
           case SDL_EVENT_GAMEPAD_ADDED: {
@@ -368,6 +407,20 @@ namespace Engine {
       {
         SDL_Window *window = App::GetLayer<AppContext>().window;
         SDL_WarpMouseInWindow(window, x, y);
+      }
+
+      void InputManager::StartTextInput() const {
+        SDL_Window *window = App::GetLayer<AppContext>().window;
+        SDL_StartTextInput(window);
+      }
+
+      void InputManager::StopTextInput() const {
+        SDL_Window *window = App::GetLayer<AppContext>().window;
+        SDL_StopTextInput(window);
+      }
+
+      std::string InputManager::GetInputText() const {
+        return m_inputText;
       }
 
       bool InputManager::IsActionPressed(ActionID actionID, int gamepadIndex) const

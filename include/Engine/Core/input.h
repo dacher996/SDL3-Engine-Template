@@ -3,6 +3,7 @@
 
 #include "Engine/Core/input_types.h"
 #include "Engine/Core/datatypes.h"
+#include <string>
 
 namespace Engine {
 
@@ -28,6 +29,11 @@ namespace Engine {
         static Vec2f GetMouseScrollDelta();
         static void SetCursorMode(CursorMode mode);
         static void SetCursorPosition(float x, float y);
+
+        // Text Input
+        static void StartTextInput();
+        static void StopTextInput();
+        static std::string GetInputText();
 
         // Binding Management
         static void BindAction(ActionID actionID, const InputChord& chord);
