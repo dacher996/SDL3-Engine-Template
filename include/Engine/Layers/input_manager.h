@@ -2,7 +2,7 @@
 #define ENGINE_INPUT_MANAGER_H
 
 #include "Engine/Core/layer_interface.h"
-#include "Engine/Core/input_types.h"
+#include "Engine/Core/Input/input_types.h"
 #include "Engine/Core/datatypes.h"
 #include "SDL3/SDL_events.h"
 #include <unordered_map>

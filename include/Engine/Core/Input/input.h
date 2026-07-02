@@ -1,7 +1,7 @@
 #ifndef ENGINE_INPUT_H
 #define ENGINE_INPUT_H
 
-#include "Engine/Core/input_types.h"
+#include "Engine/Core/Input/input_types.h"
 #include "Engine/Core/datatypes.h"
 #include <string>
 
