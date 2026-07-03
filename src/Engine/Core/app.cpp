@@ -5,6 +5,7 @@
 #include <cassert>
 
 #include "Engine/Core/defines.h"
+#include "Engine/Layers/audio_manager.h"
 #include "Engine/Layers/graphics_pipeline_manager.h"
 #if USE_IMGUI
 #include "Engine/Layers/imgui_manager.h"
@@ -75,6 +76,7 @@ SDL_AppResult Engine::App::Init() {
         AddLayer<MaterialManager>();
         AddLayer<InputManager>();
         AddLayer<SceneManager>();
+        AddLayer<AudioManager>();
         AddLayer<Renderer2D>();
 #if USE_IMGUI
         AddLayer<ImGuiManager>();
@@ -159,6 +161,7 @@ SDL_AppResult Engine::App::Iterate() {
 
 void Engine::App::Quit(SDL_AppResult result) {
     // Manually cleanup registered systems
+    GetLayer<AudioManager>().Cleanup();
     GetLayer<SceneManager>().Cleanup();
     GetLayer<MaterialManager>().Cleanup();
     GetLayer<GraphicsPipelineManager>().Cleanup();

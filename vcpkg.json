@@ -14,6 +14,14 @@
     },
     "spdlog",
     {
+      "name": "sdl3-mixer",
+      "features": [
+        "wavpack",
+        "libvorbis",
+        "mpg123"
+      ]
+    },
+    {
       "name": "imgui",
       "features": [
         "sdlgpu3-binding"

@@ -31,9 +31,16 @@ set(SOURCES src/main.cpp
 
 ## Dependencies
 
+# ZLIB (transitive dependency of SDL_image via libpng)
+find_package(ZLIB REQUIRED)
+
 ### SDL
 find_package(SDL3 CONFIG REQUIRED)
 list(APPEND LIBS SDL3::SDL3)
+
+# SDL_mixer
+find_package(SDL3_mixer CONFIG REQUIRED)
+list(APPEND LIBS $<IF:$<TARGET_EXISTS:SDL3_mixer::SDL3_mixer>,SDL3_mixer::SDL3_mixer,SDL3_mixer::SDL3_mixer-static>)
 
 ### spdlog
 find_package(spdlog CONFIG REQUIRED)
@@ -45,7 +52,7 @@ list(APPEND LIBS EnTT::EnTT)
 
 # SDL_image
 find_package(SDL3_image CONFIG REQUIRED)
-list(APPEND LIBS SDL3_image::SDL3_image)
+list(APPEND LIBS $<IF:$<TARGET_EXISTS:SDL3_image::SDL3_image-shared>,SDL3_image::SDL3_image-shared,SDL3_image::SDL3_image-static>)
 
 # GLM
 find_package(glm CONFIG REQUIRED)
