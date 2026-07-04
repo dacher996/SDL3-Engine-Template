@@ -1,5 +1,6 @@
 #include "App/Scenes/scene_2d.h"
 
+#include "Engine/Systems/audio_system.h"
 #include "Engine/Core/app.h"
 #include "Engine/Core/components.h"
 #include "Engine/Rendering/2D/renderer_2d.h"
@@ -21,6 +22,7 @@ namespace YourProject {
 
   void Scene2D::Update(float dt) {
     Engine::AnimationSystem::Update(&m_registry, dt);
+    Engine::AudioSystem::Update(&m_registry, dt);
   }
 
   void Scene2D::Render() {

@@ -6,6 +6,12 @@
 #include "Core/app_context.h"
 #include "Core/utils.h"
 
+#include "Core/Audio/audio_types.h"
+#include "Core/Audio/audio_components.h"
+#include "Core/Audio/audio.h"
+#include "Layers/audio_manager.h"
+#include "Systems/audio_system.h"
+
 #include "Layers/graphics_pipeline_manager.h"
 #include "Layers/imgui_manager.h"
 #include "Layers/input_manager.h"
