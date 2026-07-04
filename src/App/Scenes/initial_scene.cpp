@@ -77,6 +77,11 @@ namespace YourProject {
             GraphicsPipelineManager::LoadShader("TextureToScreen.frag", 1, 0, 0, 0)
         };
 
+        if (!vertShader || !fragShader || !screenVertShader || !screenFragShader) {
+            ENGINE_LOG_SDL_ERROR("Unable to load default shaders.");
+            return false;
+        }
+
         auto defaultPipeline = GraphicsPipelineManager::CreateGraphicsPipeline(
             vertShader, fragShader, GraphicsPipelineCreationInfo{});
         if (!defaultPipeline) {
