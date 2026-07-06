@@ -5,6 +5,7 @@
 
 namespace Engine {
     struct AppEvent {
+        virtual ~AppEvent() = default;
     };
 
     /// An app event coming from SDL

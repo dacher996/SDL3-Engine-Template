@@ -110,9 +110,8 @@ SDL_AppResult Engine::App::Event(SDL_Event *event) {
             auto &appContext = GetLayer<AppContext>();
             appContext.windowWidth = event->window.data1;
             appContext.windowHeight = event->window.data2;
-            GetLayer<SceneManager>().OnEvent(
-                static_cast<AppEvent>(WindowResizedEvent(event->window.data1, event->window.data2))
-            );
+            WindowResizedEvent windowEvent(event->window.data1, event->window.data2);
+            GetLayer<SceneManager>().OnEvent(windowEvent);
             return SDL_APP_CONTINUE;
         }
         break;
@@ -127,7 +126,8 @@ SDL_AppResult Engine::App::Event(SDL_Event *event) {
             break;
     }
 
-    GetLayer<SceneManager>().OnEvent(static_cast<AppEvent>(SDLEvent(event)));
+    SDLEvent sdlEvent(event);
+    GetLayer<SceneManager>().OnEvent(sdlEvent);
 
     return SDL_APP_CONTINUE;
 }

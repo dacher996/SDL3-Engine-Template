@@ -35,7 +35,7 @@ namespace Engine {
         void OnRender();
 
         /// Forwards user events and input
-        void OnEvent(AppEvent event) const;
+        void OnEvent(AppEvent& event) const;
 
         /// Clears any managed resources
         void Cleanup();

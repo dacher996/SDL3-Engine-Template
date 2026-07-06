@@ -206,13 +206,13 @@ namespace Engine {
             if (isActive && !wasActive) {
               state.pressed = true;
               state.released = false;
-              App::GetLayer<SceneManager>().OnEvent(static_cast<AppEvent>(
-                ActionPressedEvent(actPair.first, gpadIdx)));
+              ActionPressedEvent pressedEvent(actPair.first, gpadIdx);
+              App::GetLayer<SceneManager>().OnEvent(pressedEvent);
             } else if (!isActive && wasActive) {
               state.pressed = false;
               state.released = true;
-              App::GetLayer<SceneManager>().OnEvent(static_cast<AppEvent>(
-                ActionReleasedEvent(actPair.first, gpadIdx)));
+              ActionReleasedEvent releasedEvent(actPair.first, gpadIdx);
+              App::GetLayer<SceneManager>().OnEvent(releasedEvent);
             }
 
             state.axisValue = highestAxis;
@@ -317,8 +317,8 @@ namespace Engine {
       int gpadIdx = m_nextGamepadIndex++;
       m_joystickToGamepadIndex[joystickID] = gpadIdx;
       ENGINE_LOG_INFO("Gamepad added: Index {}", gpadIdx);
-      App::GetLayer<SceneManager>().OnEvent(
-        static_cast<AppEvent>(GamepadConnectedEvent(gpadIdx)));
+      GamepadConnectedEvent connectedEvent(gpadIdx);
+      App::GetLayer<SceneManager>().OnEvent(connectedEvent);
 
       // Initialize action states for this gamepad
       for (const auto &pair: m_actionBindings) {
@@ -335,8 +335,8 @@ namespace Engine {
       int gpadIdx = m_joystickToGamepadIndex[joystickID];
       m_joystickToGamepadIndex.erase(joystickID);
       ENGINE_LOG_INFO("Gamepad removed: Index {}", gpadIdx);
-      App::GetLayer<SceneManager>().OnEvent(
-        static_cast<AppEvent>(GamepadDisconnectedEvent(gpadIdx)));
+      GamepadDisconnectedEvent disconnectedEvent(gpadIdx);
+      App::GetLayer<SceneManager>().OnEvent(disconnectedEvent);
     }
   }
 

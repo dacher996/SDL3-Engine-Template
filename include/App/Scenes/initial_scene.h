@@ -10,7 +10,7 @@ namespace YourProject {
 
         void Render() override;
 
-        void OnEvent(Engine::AppEvent event) override;
+        void OnEvent(Engine::AppEvent& event) override;
 
         void OnDestroy() override;
 
