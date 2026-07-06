@@ -30,11 +30,30 @@ namespace Engine {
   }
 
   void InputManager::OnUpdate(float dt) {
-    UpdateStateTransitions();
+    UpdateAccumulators();
     EvaluateActions();
   }
 
-  void InputManager::UpdateStateTransitions() {
+  void InputManager::LateUpdate() {
+    ClearStateTransitions();
+  }
+
+  void InputManager::UpdateAccumulators() {
+    m_mouseDeltaX = m_accumMouseDeltaX;
+    m_mouseDeltaY = m_accumMouseDeltaY;
+    m_scrollDeltaX = m_accumScrollX;
+    m_scrollDeltaY = m_accumScrollY;
+
+    m_accumMouseDeltaX = 0.0f;
+    m_accumMouseDeltaY = 0.0f;
+    m_accumScrollX = 0.0f;
+    m_accumScrollY = 0.0f;
+
+    m_inputText = m_accumInputText;
+    m_accumInputText.clear();
+  }
+
+  void InputManager::ClearStateTransitions() {
     auto updateState = [](InputState &state) {
       if (state.pressed) {
         state.pressed = false;
@@ -61,18 +80,6 @@ namespace Engine {
       }
     }
 
-    m_mouseDeltaX = m_accumMouseDeltaX;
-    m_mouseDeltaY = m_accumMouseDeltaY;
-    m_scrollDeltaX = m_accumScrollX;
-    m_scrollDeltaY = m_accumScrollY;
-
-    m_accumMouseDeltaX = 0.0f;
-    m_accumMouseDeltaY = 0.0f;
-    m_accumScrollX = 0.0f;
-    m_accumScrollY = 0.0f;
-
-    m_inputText = m_accumInputText;
-    m_accumInputText.clear();
   }
 
   void InputManager::EvaluateActions() {
@@ -199,13 +206,13 @@ namespace Engine {
             if (isActive && !wasActive) {
               state.pressed = true;
               state.released = false;
-              App::GetLayer<SceneManager>().OnEvent(static_cast<AppEvent>(
-                ActionPressedEvent(actPair.first, gpadIdx)));
+              ActionPressedEvent pressedEvent(actPair.first, gpadIdx);
+              App::GetLayer<SceneManager>().OnEvent(pressedEvent);
             } else if (!isActive && wasActive) {
               state.pressed = false;
               state.released = true;
-              App::GetLayer<SceneManager>().OnEvent(static_cast<AppEvent>(
-                ActionReleasedEvent(actPair.first, gpadIdx)));
+              ActionReleasedEvent releasedEvent(actPair.first, gpadIdx);
+              App::GetLayer<SceneManager>().OnEvent(releasedEvent);
             }
 
             state.axisValue = highestAxis;
@@ -310,8 +317,8 @@ namespace Engine {
       int gpadIdx = m_nextGamepadIndex++;
       m_joystickToGamepadIndex[joystickID] = gpadIdx;
       ENGINE_LOG_INFO("Gamepad added: Index {}", gpadIdx);
-      App::GetLayer<SceneManager>().OnEvent(
-        static_cast<AppEvent>(GamepadConnectedEvent(gpadIdx)));
+      GamepadConnectedEvent connectedEvent(gpadIdx);
+      App::GetLayer<SceneManager>().OnEvent(connectedEvent);
 
       // Initialize action states for this gamepad
       for (const auto &pair: m_actionBindings) {
@@ -328,8 +335,8 @@ namespace Engine {
       int gpadIdx = m_joystickToGamepadIndex[joystickID];
       m_joystickToGamepadIndex.erase(joystickID);
       ENGINE_LOG_INFO("Gamepad removed: Index {}", gpadIdx);
-      App::GetLayer<SceneManager>().OnEvent(
-        static_cast<AppEvent>(GamepadDisconnectedEvent(gpadIdx)));
+      GamepadDisconnectedEvent disconnectedEvent(gpadIdx);
+      App::GetLayer<SceneManager>().OnEvent(disconnectedEvent);
     }
   }
 

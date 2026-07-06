@@ -17,6 +17,7 @@ namespace Engine {
         ~InputManager();
 
         void OnUpdate(float dt);
+        void LateUpdate();
         bool HandleEvent(SDL_Event* event);
 
         // State Polling (Used by static Input API)
@@ -97,7 +98,8 @@ namespace Engine {
         std::unordered_map<SDL_JoystickID, int> m_joystickToGamepadIndex;
         int m_nextGamepadIndex = 0;
 
-        void UpdateStateTransitions();
+        void UpdateAccumulators();
+        void ClearStateTransitions();
         void EvaluateActions();
         
         void AddGamepad(SDL_JoystickID joystickID);

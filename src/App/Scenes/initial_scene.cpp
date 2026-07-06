@@ -38,7 +38,7 @@ namespace YourProject {
     void InitialScene::Render() {
     }
 
-    void InitialScene::OnEvent(AppEvent event) {
+    void InitialScene::OnEvent(AppEvent& event) {
     }
 
     void InitialScene::OnDestroy() {
@@ -132,4 +132,4 @@ namespace YourProject {
 
         return true;
     }
-} // namespace YourProject
+}

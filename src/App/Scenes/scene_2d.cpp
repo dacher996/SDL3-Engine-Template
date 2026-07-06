@@ -3,6 +3,7 @@
 #include "Engine/Systems/audio_system.h"
 #include "Engine/Core/app.h"
 #include "Engine/Core/components.h"
+#include "Engine/Core/Input/input.h"
 #include "Engine/Rendering/2D/renderer_2d.h"
 #include "Engine/Rendering/2D/sprite_helper.h"
 #include "Engine/Systems/animation_system.h"
@@ -20,6 +21,8 @@ namespace YourProject {
 
   Scene2D::~Scene2D() = default;
 
+  bool isVisible{true};
+
   void Scene2D::Update(float dt) {
     Engine::AnimationSystem::Update(&m_registry, dt);
     Engine::AudioSystem::Update(&m_registry, dt);
@@ -32,7 +35,8 @@ namespace YourProject {
     renderer.Submit(PrepareSprites());
 
 #if USE_IMGUI
-    ImGui::ShowDemoWindow();
+    if (isVisible)
+      ImGui::ShowDemoWindow();
 #endif
 
     // Submit debug primitives
@@ -46,7 +50,7 @@ namespace YourProject {
     renderer.Present();
   }
 
-  void Scene2D::OnEvent(Engine::AppEvent event) {
+  void Scene2D::OnEvent(Engine::AppEvent &event) {
   }
 
   void Scene2D::OnDestroy() {
@@ -95,4 +99,4 @@ namespace YourProject {
   Engine::SpriteSubmission Scene2D::PrepareSprites(Engine::Camera2D &camera) {
     return Engine::GetSpriteSubmission(&m_registry, camera, GetVisibleEntities());
   }
-} // namespace YourProject
+}
