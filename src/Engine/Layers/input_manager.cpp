@@ -30,11 +30,30 @@ namespace Engine {
   }
 
   void InputManager::OnUpdate(float dt) {
-    UpdateStateTransitions();
+    UpdateAccumulators();
     EvaluateActions();
   }
 
-  void InputManager::UpdateStateTransitions() {
+  void InputManager::LateUpdate() {
+    ClearStateTransitions();
+  }
+
+  void InputManager::UpdateAccumulators() {
+    m_mouseDeltaX = m_accumMouseDeltaX;
+    m_mouseDeltaY = m_accumMouseDeltaY;
+    m_scrollDeltaX = m_accumScrollX;
+    m_scrollDeltaY = m_accumScrollY;
+
+    m_accumMouseDeltaX = 0.0f;
+    m_accumMouseDeltaY = 0.0f;
+    m_accumScrollX = 0.0f;
+    m_accumScrollY = 0.0f;
+
+    m_inputText = m_accumInputText;
+    m_accumInputText.clear();
+  }
+
+  void InputManager::ClearStateTransitions() {
     auto updateState = [](InputState &state) {
       if (state.pressed) {
         state.pressed = false;
@@ -61,18 +80,6 @@ namespace Engine {
       }
     }
 
-    m_mouseDeltaX = m_accumMouseDeltaX;
-    m_mouseDeltaY = m_accumMouseDeltaY;
-    m_scrollDeltaX = m_accumScrollX;
-    m_scrollDeltaY = m_accumScrollY;
-
-    m_accumMouseDeltaX = 0.0f;
-    m_accumMouseDeltaY = 0.0f;
-    m_accumScrollX = 0.0f;
-    m_accumScrollY = 0.0f;
-
-    m_inputText = m_accumInputText;
-    m_accumInputText.clear();
   }
 
   void InputManager::EvaluateActions() {

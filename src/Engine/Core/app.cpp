@@ -96,14 +96,14 @@ SDL_AppResult Engine::App::Event(SDL_Event *event) {
         }
     }
 
+    GetLayer<InputManager>().HandleEvent(event);
+
 #if USE_IMGUI
     // If the ImGUI wants to handle events, do not propagate them to the app
     if (GetLayer<ImGuiManager>().HandleEvent(event)) {
         return SDL_APP_CONTINUE;
     }
 #endif
-
-    GetLayer<InputManager>().HandleEvent(event);
 
     switch (event->type) {
         case SDL_EVENT_WINDOW_RESIZED: {
@@ -156,6 +156,7 @@ SDL_AppResult Engine::App::Iterate() {
     GetLayer<ImGuiManager>().Render();
 #endif
 
+    GetLayer<InputManager>().LateUpdate();
     return SDL_APP_CONTINUE;
 }
 

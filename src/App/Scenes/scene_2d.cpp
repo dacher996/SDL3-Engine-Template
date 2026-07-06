@@ -3,6 +3,7 @@
 #include "Engine/Systems/audio_system.h"
 #include "Engine/Core/app.h"
 #include "Engine/Core/components.h"
+#include "Engine/Core/Input/input.h"
 #include "Engine/Rendering/2D/renderer_2d.h"
 #include "Engine/Rendering/2D/sprite_helper.h"
 #include "Engine/Systems/animation_system.h"
@@ -95,4 +96,4 @@ namespace YourProject {
   Engine::SpriteSubmission Scene2D::PrepareSprites(Engine::Camera2D &camera) {
     return Engine::GetSpriteSubmission(&m_registry, camera, GetVisibleEntities());
   }
-} // namespace YourProject
+}
