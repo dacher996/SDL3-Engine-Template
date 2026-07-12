@@ -31,16 +31,36 @@ namespace Engine {
         return GetInputManager().IsKeyHeld(key);
     }
 
-    bool Input::IsModifierHeld(KeyCode modifier) {
+    bool Input::IsKeyReleased(KeyCode key) {
+        return GetInputManager().IsKeyReleased(key);
+    }
+
+    bool Input::IsModifierHeld(Modifier modifier) {
         return GetInputManager().IsModifierHeld(modifier);
     }
 
     bool Input::IsMouseButtonPressed(MouseCode button) {
         return GetInputManager().IsMouseButtonPressed(button);
     }
+    
+    bool Input::IsMouseButtonHeld(MouseCode button) {
+        return GetInputManager().IsMouseButtonHeld(button);
+    }
+
+    bool Input::IsMouseButtonReleased(MouseCode button) {
+        return GetInputManager().IsMouseButtonReleased(button);
+    }
 
     bool Input::IsGamepadButtonPressed(GamepadCode button, int gamepadIndex) {
         return GetInputManager().IsGamepadButtonPressed(button, gamepadIndex);
+    }
+
+    bool Input::IsGamepadButtonHeld(GamepadCode button, int gamepadIndex) {
+        return GetInputManager().IsGamepadButtonHeld(button, gamepadIndex);
+    }
+
+    bool Input::IsGamepadButtonReleased(GamepadCode button, int gamepadIndex) {
+        return GetInputManager().IsGamepadButtonReleased(button, gamepadIndex);
     }
 
     float Input::GetGamepadAxis(GamepadAxisCode axis, int gamepadIndex) {
@@ -69,6 +89,18 @@ namespace Engine {
 
     void Input::SetCursorPosition(float x, float y) {
         GetInputManager().SetCursorPosition(x, y);
+    }
+
+    int Input::GetTouchCount() {
+        return GetInputManager().GetTouchCount();
+    }
+
+    const TouchPoint* Input::GetTouch(int index) {
+        return GetInputManager().GetTouch(index);
+    }
+
+    const TouchPoint* Input::GetTouchByFingerID(Uint64 fingerID) {
+        return GetInputManager().GetTouchByFingerID(fingerID);
     }
 
     void Input::StartTextInput() {

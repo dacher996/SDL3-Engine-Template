@@ -80,144 +80,135 @@ namespace Engine {
       }
     }
 
+    for (auto it = m_touches.begin(); it != m_touches.end();) {
+      if (it->released) {
+        it = m_touches.erase(it);
+      } else {
+        if (it->pressed) {
+          it->pressed = false;
+          it->held = true;
+        }
+        ++it;
+      }
+    }
   }
 
   void InputManager::EvaluateActions() {
-    // We will evaluate actions from current hardware state
-    // If an action transitions to true, we fire an event if not already held.
-    // Wait, for simplicity, we evaluate actions inside the OnUpdate to keep state
-    // correct, but AppEvent dispatch for actions should ideally happen as soon as
-    // the hardware event arrives, OR we dispatch it here during OnUpdate. Firing
-    // during hardware event (HandleEvent) is better for latency. The evaluate
-    // here ensures hold states for actions are correct.
-
-    // Reset all action evaluations
     for (auto &gamepadPair: m_actionStates) {
       for (auto &actPair: gamepadPair.second) {
-        // If it was pressed/held, assume not pressed this frame until proven
-        // otherwise, but wait, we already track transitions. It's better to
-        // update action state directly in HandleEvent, OR we just compute the raw
-        // 'is active' from hardware, and manage transitions.
-        for (auto &gamepadPair: m_actionStates) {
-          for (auto &actPair: gamepadPair.second) {
-            bool isActive = false;
-            float highestAxis = 0.0f;
-            int gpadIdx = gamepadPair.first;
+        bool isActive = false;
+        float highestAxis = 0.0f;
+        int gpadIdx = gamepadPair.first;
 
-            auto it = m_actionBindings.find(actPair.first);
-            if (it != m_actionBindings.end()) {
-              for (const auto &chord: it->second) {
-                bool chordActive = true;
-                float chordAxis = 0.0f;
+        auto it = m_actionBindings.find(actPair.first);
+        if (it != m_actionBindings.end()) {
+          for (const auto &chord: it->second) {
+            bool chordActive = true;
+            float chordAxis = 0.0f;
 
-                for (const auto &binding: chord.bindings) {
-                  bool bindingActive = false;
-                  switch (binding.deviceType) {
-                    case InputDeviceType::Keyboard:
-                      if (IsKeyHeld(std::get<KeyCode>(binding.code)) ||
-                          IsKeyPressed(std::get<KeyCode>(binding.code)))
-                        bindingActive = true;
-                      break;
-                    case InputDeviceType::MouseButton:
-                      if (IsMouseButtonPressed(std::get<MouseCode>(binding.code)))
-                        bindingActive = true;
-                      {
-                        auto m_it =
-                            m_mouseStates.find(std::get<MouseCode>(binding.code));
-                        if (m_it != m_mouseStates.end() &&
-                            (m_it->second.pressed || m_it->second.held))
-                          bindingActive = true;
-                      }
-                      break;
-                    case InputDeviceType::GamepadButton: {
-                      auto b_it = m_gamepadButtonStates[gpadIdx].find(
-                        std::get<GamepadCode>(binding.code));
-                      if (b_it != m_gamepadButtonStates[gpadIdx].end() &&
-                          (b_it->second.pressed || b_it->second.held))
-                        bindingActive = true;
+            for (const auto &binding: chord.bindings) {
+              bool bindingActive = false;
+              switch (binding.deviceType) {
+                case InputDeviceType::Keyboard:
+                  if (IsKeyHeld(std::get<KeyCode>(binding.code)) ||
+                      IsKeyPressed(std::get<KeyCode>(binding.code)))
+                    bindingActive = true;
+                  break;
+                case InputDeviceType::MouseButton: {
+                  auto m_it =
+                      m_mouseStates.find(std::get<MouseCode>(binding.code));
+                  if (m_it != m_mouseStates.end() &&
+                      (m_it->second.pressed || m_it->second.held))
+                    bindingActive = true;
+                }
+                break;
+                case InputDeviceType::GamepadButton: {
+                  auto b_it = m_gamepadButtonStates[gpadIdx].find(
+                    std::get<GamepadCode>(binding.code));
+                  if (b_it != m_gamepadButtonStates[gpadIdx].end() &&
+                      (b_it->second.pressed || b_it->second.held))
+                    bindingActive = true;
+                }
+                break;
+                case InputDeviceType::GamepadAxis: {
+                  GamepadAxisCode axisCode =
+                      std::get<GamepadAxisCode>(binding.code);
+                  float axisVal = GetGamepadAxis(axisCode, gpadIdx);
+
+                  if (axisCode == Gamepad::AxisLeftX ||
+                      axisCode == Gamepad::AxisLeftY ||
+                      axisCode == Gamepad::AxisRightX ||
+                      axisCode == Gamepad::AxisRightY) {
+                    float x = 0.0f, y = 0.0f;
+                    if (axisCode == Gamepad::AxisLeftX ||
+                        axisCode == Gamepad::AxisLeftY) {
+                      x = GetGamepadAxis(Gamepad::AxisLeftX, gpadIdx);
+                      y = GetGamepadAxis(Gamepad::AxisLeftY, gpadIdx);
+                    } else {
+                      x = GetGamepadAxis(Gamepad::AxisRightX, gpadIdx);
+                      y = GetGamepadAxis(Gamepad::AxisRightY, gpadIdx);
                     }
-                    break;
-                    case InputDeviceType::GamepadAxis: {
-                      GamepadAxisCode axisCode =
-                          std::get<GamepadAxisCode>(binding.code);
-                      float axisVal = GetGamepadAxis(axisCode, gpadIdx);
 
-                      if (axisCode == Gamepad::AxisLeftX ||
-                          axisCode == Gamepad::AxisLeftY ||
-                          axisCode == Gamepad::AxisRightX ||
-                          axisCode == Gamepad::AxisRightY) {
-                        float x = 0.0f, y = 0.0f;
-                        if (axisCode == Gamepad::AxisLeftX ||
-                            axisCode == Gamepad::AxisLeftY) {
-                          x = GetGamepadAxis(Gamepad::AxisLeftX, gpadIdx);
-                          y = GetGamepadAxis(Gamepad::AxisLeftY, gpadIdx);
-                        } else {
-                          x = GetGamepadAxis(Gamepad::AxisRightX, gpadIdx);
-                          y = GetGamepadAxis(Gamepad::AxisRightY, gpadIdx);
-                        }
+                    float magnitude = std::sqrt(x * x + y * y);
+                    if (magnitude >= binding.deadzone) {
+                      bindingActive = true;
 
-                        float magnitude = std::sqrt(x * x + y * y);
-                        if (magnitude >= binding.deadzone) {
-                          bindingActive = true;
+                      float normalizedMag = 0.0f;
+                      if (binding.deadzone < 1.0f) {
+                        normalizedMag =
+                            std::clamp((magnitude - binding.deadzone) /
+                                       (1.0f - binding.deadzone),
+                                       0.0f, 1.0f);
+                      }
 
-                          float normalizedMag = 0.0f;
-                          if (binding.deadzone < 1.0f) {
-                            normalizedMag =
-                                std::clamp((magnitude - binding.deadzone) /
-                                           (1.0f - binding.deadzone),
-                                           0.0f, 1.0f);
-                          }
-
-                          float scaledAxis = (axisVal / magnitude) * normalizedMag;
-                          if (std::abs(scaledAxis) > std::abs(chordAxis)) {
-                            chordAxis = scaledAxis;
-                          }
-                        }
-                      } else {
-                        // Triggers don't need radial deadzones
-                        if (std::abs(axisVal) >= binding.deadzone) {
-                          bindingActive = true;
-                          if (std::abs(axisVal) > std::abs(chordAxis)) {
-                            chordAxis = axisVal;
-                          }
-                        }
+                      float scaledAxis = (axisVal / magnitude) * normalizedMag;
+                      if (std::abs(scaledAxis) > std::abs(chordAxis)) {
+                        chordAxis = scaledAxis;
                       }
                     }
-                    break;
-                  }
-
-                  if (!bindingActive) {
-                    chordActive = false;
-                    break;
+                  } else {
+                    // Triggers don't need radial deadzones
+                    if (std::abs(axisVal) >= binding.deadzone) {
+                      bindingActive = true;
+                      if (std::abs(axisVal) > std::abs(chordAxis)) {
+                        chordAxis = axisVal;
+                      }
+                    }
                   }
                 }
+                break;
+              }
 
-                if (chordActive && !chord.bindings.empty()) {
-                  isActive = true;
-                  if (std::abs(chordAxis) > std::abs(highestAxis))
-                    highestAxis = chordAxis;
-                }
+              if (!bindingActive) {
+                chordActive = false;
+                break;
               }
             }
 
-            auto &state = actPair.second;
-            bool wasActive = state.pressed || state.held;
-
-            if (isActive && !wasActive) {
-              state.pressed = true;
-              state.released = false;
-              ActionPressedEvent pressedEvent(actPair.first, gpadIdx);
-              App::GetLayer<SceneManager>().OnEvent(pressedEvent);
-            } else if (!isActive && wasActive) {
-              state.pressed = false;
-              state.released = true;
-              ActionReleasedEvent releasedEvent(actPair.first, gpadIdx);
-              App::GetLayer<SceneManager>().OnEvent(releasedEvent);
+            if (chordActive && !chord.bindings.empty()) {
+              isActive = true;
+              if (std::abs(chordAxis) > std::abs(highestAxis))
+                highestAxis = chordAxis;
             }
-
-            state.axisValue = highestAxis;
           }
         }
+
+        auto &state = actPair.second;
+        bool wasActive = state.pressed || state.held;
+
+        if (isActive && !wasActive) {
+          state.pressed = true;
+          state.released = false;
+          ActionPressedEvent pressedEvent(actPair.first, gpadIdx);
+          App::GetLayer<SceneManager>().OnEvent(pressedEvent);
+        } else if (!isActive && wasActive) {
+          state.pressed = false;
+          state.released = true;
+          ActionReleasedEvent releasedEvent(actPair.first, gpadIdx);
+          App::GetLayer<SceneManager>().OnEvent(releasedEvent);
+        }
+
+        state.axisValue = highestAxis;
       }
     }
   }
@@ -301,6 +292,51 @@ namespace Engine {
             event->gaxis.value / 32767.0f; // roughly normalize to -1.0 to 1.0
         m_gamepadAxes[gpadIdx]
             [static_cast<GamepadAxisCode>(event->gaxis.axis)] = val;
+        break;
+      }
+      case SDL_EVENT_FINGER_DOWN: {
+        Uint64 fingerId = event->tfinger.fingerID;
+        bool found = false;
+        for (auto &touch: m_touches) {
+          if (touch.fingerID == fingerId) {
+            touch.pressed = true;
+            touch.released = false;
+            touch.held = false;
+            touch.position = Vec2f(event->tfinger.x, event->tfinger.y);
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          TouchPoint touch;
+          touch.fingerID = fingerId;
+          touch.position = Vec2f(event->tfinger.x, event->tfinger.y);
+          touch.pressed = true;
+          m_touches.push_back(touch);
+        }
+        break;
+      }
+      case SDL_EVENT_FINGER_UP: {
+        Uint64 fingerId = event->tfinger.fingerID;
+        for (auto &touch: m_touches) {
+          if (touch.fingerID == fingerId) {
+            touch.released = true;
+            touch.pressed = false;
+            touch.held = false;
+            touch.position = Vec2f(event->tfinger.x, event->tfinger.y);
+            break;
+          }
+        }
+        break;
+      }
+      case SDL_EVENT_FINGER_MOTION: {
+        Uint64 fingerId = event->tfinger.fingerID;
+        for (auto &touch: m_touches) {
+          if (touch.fingerID == fingerId) {
+            touch.position = Vec2f(event->tfinger.x, event->tfinger.y);
+            break;
+          }
+        }
         break;
       }
       default: ;
@@ -432,6 +468,26 @@ namespace Engine {
     return m_inputText;
   }
 
+  int InputManager::GetTouchCount() const {
+    return static_cast<int>(m_touches.size());
+  }
+
+  const TouchPoint *InputManager::GetTouch(int index) const {
+    if (index >= 0 && index < m_touches.size()) {
+      return &m_touches[index];
+    }
+    return nullptr;
+  }
+
+  const TouchPoint *InputManager::GetTouchByFingerID(Uint64 fingerID) const {
+    for (const auto &touch: m_touches) {
+      if (touch.fingerID == fingerID) {
+        return &touch;
+      }
+    }
+    return nullptr;
+  }
+
   bool InputManager::IsActionPressed(ActionID actionID, int gamepadIndex)
   const {
     if (auto it1 = m_actionStates.find(gamepadIndex);
@@ -481,13 +537,38 @@ namespace Engine {
     return it != m_keyStates.end() && (it->second.held || it->second.pressed);
   }
 
-  bool InputManager::IsModifierHeld(KeyCode modifier) const {
-    return IsKeyHeld(modifier);
+  bool InputManager::IsKeyReleased(KeyCode key) const {
+    auto it = m_keyStates.find(key);
+    return it != m_keyStates.end() && it->second.released;
+  }
+
+  bool InputManager::IsModifierHeld(Modifier modifier) const {
+    switch (modifier) {
+      case Modifier::Shift:
+        return IsKeyHeld(Key::LeftShift) || IsKeyHeld(Key::RightShift);
+      case Modifier::Ctrl:
+        return IsKeyHeld(Key::LeftCtrl) || IsKeyHeld(Key::RightCtrl);
+      case Modifier::Alt:
+        return IsKeyHeld(Key::LeftAlt) || IsKeyHeld(Key::RightAlt);
+      case Modifier::GUI:
+        return IsKeyHeld(Key::LeftGUI) || IsKeyHeld(Key::RightGUI);
+    }
+    return false;
   }
 
   bool InputManager::IsMouseButtonPressed(MouseCode button) const {
     auto it = m_mouseStates.find(button);
     return it != m_mouseStates.end() && it->second.pressed;
+  }
+
+  bool InputManager::IsMouseButtonHeld(MouseCode button) const {
+    auto it = m_mouseStates.find(button);
+    return it != m_mouseStates.end() && (it->second.held || it->second.pressed);
+  }
+
+  bool InputManager::IsMouseButtonReleased(MouseCode button) const {
+    auto it = m_mouseStates.find(button);
+    return it != m_mouseStates.end() && it->second.released;
   }
 
   bool InputManager::IsGamepadButtonPressed(GamepadCode button,
@@ -496,6 +577,26 @@ namespace Engine {
       it1 != m_gamepadButtonStates.end()) {
       if (auto it2 = it1->second.find(button); it2 != it1->second.end())
         return it2->second.pressed;
+    }
+    return false;
+  }
+
+  bool InputManager::IsGamepadButtonHeld(GamepadCode button,
+                                         int gamepadIndex) const {
+    if (auto it1 = m_gamepadButtonStates.find(gamepadIndex);
+      it1 != m_gamepadButtonStates.end()) {
+      if (auto it2 = it1->second.find(button); it2 != it1->second.end())
+        return it2->second.held || it2->second.pressed;
+    }
+    return false;
+  }
+
+  bool InputManager::IsGamepadButtonReleased(GamepadCode button,
+                                             int gamepadIndex) const {
+    if (auto it1 = m_gamepadButtonStates.find(gamepadIndex);
+      it1 != m_gamepadButtonStates.end()) {
+      if (auto it2 = it1->second.find(button); it2 != it1->second.end())
+        return it2->second.released;
     }
     return false;
   }

@@ -25,7 +25,7 @@ namespace Engine {
     struct Sprite {
         Uint32 spriteId;
         float rotation{0};
-        Color color{Color::WHITE};
+        Color color{Color::White};
         Vec2f origin{0.5f, 0.5f};
         SpriteFlipMode flipSprite{SpriteFlipMode::FLIP_NONE};
     };
@@ -47,7 +47,7 @@ namespace Engine {
     struct SpriteAnimator {
         std::unordered_map<Uint32, AnimationClip> animations;
         Uint32 currentAnimation{0};
-        
+
         float currentTime{0.0f};
         bool isPlaying{false};
         int currentFrameIndex{0};

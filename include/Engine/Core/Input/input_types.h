@@ -6,6 +6,7 @@
 #include "Engine/Core/Input/gamepad_codes.h"
 #include <variant>
 #include <vector>
+#include "Engine/Core/datatypes.h"
 
 namespace Engine {
     using ActionID = Uint32;
@@ -23,6 +24,21 @@ namespace Engine {
         Locked
     };
 
+    enum class Modifier {
+        Shift,
+        Ctrl,
+        Alt,
+        GUI
+    };
+
+    struct TouchPoint {
+        Uint64 fingerID = 0;
+        Vec2f position{Vec2f::ZERO};
+        bool pressed = false;
+        bool held = false;
+        bool released = false;
+    };
+
     struct InputBinding {
         InputDeviceType deviceType;
         std::variant<KeyCode, MouseCode, GamepadCode, GamepadAxisCode> code;
@@ -30,8 +46,11 @@ namespace Engine {
 
         // Convenience constructors
         InputBinding(KeyCode key);
+
         InputBinding(MouseCode mouseBtn);
+
         InputBinding(GamepadCode gpBtn);
+
         InputBinding(GamepadAxisCode gpAxis, float axisDeadzone = 0.1f);
     };
 

@@ -81,7 +81,7 @@ namespace Engine {
           std::array textureSamplerBindings{
             SDL_GPUTextureSamplerBinding{
               .texture = textureData->texture,
-              .sampler = App::GetLayer<TextureSamplerManager>().GetSampler(LINEAR_CLAMP),
+              .sampler = App::GetLayer<TextureSamplerManager>().GetSampler(POINT_CLAMP),
             },
           };
           SDL_BindGPUFragmentSamplers(renderPass, 0, textureSamplerBindings.data(), textureSamplerBindings.size());

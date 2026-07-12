@@ -3,6 +3,7 @@
 #include "App/Core/Parsers/inhouse_spritesheet_parser.h"
 #include "App/Scenes/scene_2d.h"
 #include "Engine/Core/app.h"
+#include "Engine/Core/app_context.h"
 #include "Engine/Core/logger.h"
 #include "Engine/Layers/graphics_pipeline_manager.h"
 #include "Engine/Layers/material_manager.h"
@@ -31,6 +32,9 @@ namespace YourProject {
 
         SetDefaults();
 
+        // Request window focus
+        SDL_RaiseWindow(App::GetLayer<AppContext>().window);
+
         // Go to next scene after everything has finished loading
         App::GetLayer<SceneManager>().ReplaceScene(new Scene2D());
     }
@@ -38,7 +42,7 @@ namespace YourProject {
     void InitialScene::Render() {
     }
 
-    void InitialScene::OnEvent(AppEvent& event) {
+    void InitialScene::OnEvent(AppEvent &event) {
     }
 
     void InitialScene::OnDestroy() {

@@ -60,14 +60,14 @@ namespace Engine {
         /// specify the depth (z-index).
         void DrawTexture(float x, float y, float w, float h,
                          const TextureRegion *region,
-                         const Color &color = Color::WHITE, float rotation = 0.0f,
+                         const Color &color = Color::White, float rotation = 0.0f,
                          Uint16 depth = SHAPE_2D_BATCH_MAX_DEPTH);
 
         /// Draws a texture region using a Rectf object for its destination bounds.
         /// You can tint it with a color, and the rotation is in radians. You can also
         /// specify the depth (z-index).
         void DrawTexture(Rectf rect, const TextureRegion *region,
-                         const Color &color = Color::WHITE, float rotation = 0.0f,
+                         const Color &color = Color::White, float rotation = 0.0f,
                          Uint16 depth = SHAPE_2D_BATCH_MAX_DEPTH);
 
         /// Returns the completed sprite submission

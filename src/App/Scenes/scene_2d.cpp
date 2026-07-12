@@ -3,7 +3,6 @@
 #include "Engine/Systems/audio_system.h"
 #include "Engine/Core/app.h"
 #include "Engine/Core/components.h"
-#include "Engine/Core/Input/input.h"
 #include "Engine/Rendering/2D/renderer_2d.h"
 #include "Engine/Rendering/2D/sprite_helper.h"
 #include "Engine/Systems/animation_system.h"
@@ -40,12 +39,14 @@ namespace YourProject {
 #endif
 
     // Submit debug primitives
+    //{
     // Engine::Shape2DBatch shapeBatch(m_camera.GetViewMatrix());
     // shapeBatch.DrawLine(96.0f, 96.f, 256.0f, 64.0f, Engine::Color{0, 255, 0,
     // 255}, 3.0f); shapeBatch.DrawRectOutlined(64.0f, 64.0f, 32.0f, 64.0f,
     // Engine::Color{255, 0, 0, 255}, 2.0f);
     // shapeBatch.DrawRect(128.0f, 64.0f, 64.0f, 32.0f, Engine::Color{0, 0, 255,
     // 128}, 0.5f); renderer.Submit(shapeBatch);
+    //}
 
     renderer.Present();
   }
@@ -56,7 +57,9 @@ namespace YourProject {
   void Scene2D::OnDestroy() {
   }
 
-  Engine::Camera2D &Scene2D::GetCamera() { return m_camera; }
+  Engine::Camera2D &Scene2D::GetCamera() {
+    return m_camera;
+  }
 
   std::vector<Engine::Entity> Scene2D::GetVisibleEntities() {
     return GetVisibleEntities(Engine::Rectf::ZERO);

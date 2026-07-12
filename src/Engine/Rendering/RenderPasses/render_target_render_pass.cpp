@@ -41,7 +41,7 @@ namespace Engine {
     // black), and store operation is STORE to keep the rendered quad.
     SDL_GPUColorTargetInfo swapchainTargetInfo = {
       .texture = m_swapchainTexture,
-      .clear_color = (SDL_FColor){1.0f, 0.0f, 0.0f, 1.0f},
+      .clear_color = SDL_FColor{0.0f, 0.0f, 0.0f, 1.0f},
       .load_op = SDL_GPU_LOADOP_CLEAR,
       .store_op = SDL_GPU_STOREOP_STORE
     };

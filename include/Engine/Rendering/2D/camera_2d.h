@@ -17,10 +17,13 @@ namespace Engine {
 
         [[nodiscard]] glm::mat4 GetViewMatrix() const;
 
+        /// Translates the camera by given amount
         void Translate(float x, float y);
 
+        /// Increments the rotation by amount in radians
         void Rotate(float radians);
 
+        /// Increments the zoom by amount
         void Zoom(float amount);
 
         void Reset();
@@ -36,11 +39,26 @@ namespace Engine {
 
         [[nodiscard]] Vec2f WorldToScreen(Vec2f position) const;
 
+        /// Sets the rotation in radians
+        void SetRotation(float radians);
+
+        /// Sets the rotation in degrees
+        void SetRotationDeg(float degrees);
+
+        /// Sets the zoom
+        void SetZoom(float zoom);
+
+        /// Sets the position instantly
+        void SetPosition(float x, float y);
+
         /// Returns the zoom amount
         [[nodiscard]] float GetZoom() const { return zoomFactor; }
 
         /// Returns the rotation amount in radians
         [[nodiscard]] float GetRotation() const { return rotation; }
+
+        /// Returns the camera position
+        [[nodiscard]] Vec2f GetPosition() const { return {cameraPosition.x, cameraPosition.y}; }
 
         /// Returns camera bounds expressed in world coordinates as (x,y,w,h)
         [[nodiscard]] Rectf GetCameraWorldBounds() const;

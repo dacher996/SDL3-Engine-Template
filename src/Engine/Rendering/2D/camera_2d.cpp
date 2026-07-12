@@ -3,6 +3,7 @@
 #include "Engine/Core/app.h"
 #include "Engine/Core/app_context.h"
 #include "Engine/Core/defines.h"
+#include "Engine/Core/utils.h"
 
 namespace Engine {
   Camera2D::Camera2D() : Camera2D(LOGICAL_APP_WIDTH, LOGICAL_APP_HEIGHT) {
@@ -15,7 +16,7 @@ namespace Engine {
   Camera2D::Camera2D(float width, float height, float startX, float startY) : width(width), height(height) {
     cameraPosition.x = startX;
     cameraPosition.y = startY;
-    projection = glm::ortho(0.0f, width, 0.0f, height, -1.0f, 1.0f);
+    projection = glm::ortho(0.0f, width, height, 0.0f, -1.0f, 1.0f);
   }
 
   glm::mat4 Camera2D::GetViewMatrix() const {
@@ -24,7 +25,7 @@ namespace Engine {
 
     auto view = glm::mat4(1.0f);
     view = glm::translate(view, center);
-    view = glm::rotate(view, glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+    view = glm::rotate(view, rotation, glm::vec3(0.0f, 0.0f, 1.0f));
     view = glm::scale(view, glm::vec3(zoomFactor, zoomFactor, 1.0f));
     view = glm::translate(view, -center - cameraPosition);
 
@@ -100,6 +101,24 @@ namespace Engine {
   Vec2f Camera2D::WorldToScreen(Vec2f position) const {
     return WorldToScreen(position, GetViewMatrix());
   }
+
+  void Camera2D::SetRotation(float radians) {
+    rotation = radians;
+  }
+
+  void Camera2D::SetRotationDeg(float degrees) {
+    rotation = deg2rad(degrees);
+  }
+
+  void Camera2D::SetZoom(float zoom) {
+    zoomFactor = zoom;
+  }
+
+  void Camera2D::SetPosition(float x, float y) {
+    cameraPosition.x = x;
+    cameraPosition.y = y;
+  }
+
 
   Rectf Camera2D::GetCameraWorldBounds() const {
     auto viewMatrix = GetViewMatrix();

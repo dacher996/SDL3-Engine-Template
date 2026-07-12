@@ -21,6 +21,11 @@ namespace Engine {
     Recti::operator SDL_Rect() const { return SDL_Rect({x, y, w, h}); }
     Rectf::operator SDL_FRect() const { return SDL_FRect({x, y, w, h}); }
 
+    Vec2i Vec2i::operator*(const int &val) const { return {x * val, y * val}; }
+    Vec2f Vec2f::operator*(const float &val) const { return {x * val, y * val}; }
+    Vec3i Vec3i::operator*(const int &val) const { return {x * val, y * val, z * val}; }
+    Vec3f Vec3f::operator*(const float &val) const { return {x * val, y * val, z * val}; }
+
     bool Recti::IsIntersecting(const Recti &other) const {
         SDL_Rect result;
         SDL_Rect thisRect = *this;

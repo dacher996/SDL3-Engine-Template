@@ -10,51 +10,88 @@
 #include <string>
 
 namespace Engine {
-
     class InputManager : public ILayer {
     public:
         InputManager();
+
         ~InputManager();
 
         void OnUpdate(float dt);
+
         void LateUpdate();
-        bool HandleEvent(SDL_Event* event);
+
+        bool HandleEvent(SDL_Event *event);
 
         // State Polling (Used by static Input API)
         bool IsActionPressed(ActionID actionID, int gamepadIndex = 0) const;
+
         bool IsActionHeld(ActionID actionID, int gamepadIndex = 0) const;
+
         bool IsActionReleased(ActionID actionID, int gamepadIndex = 0) const;
+
         float GetActionAxis(ActionID actionID, int gamepadIndex = 0) const;
 
         bool IsKeyPressed(KeyCode key) const;
+
         bool IsKeyHeld(KeyCode key) const;
-        bool IsModifierHeld(KeyCode modifier) const;
+
+        bool IsKeyReleased(KeyCode key) const;
+
+        bool IsModifierHeld(Modifier modifier) const;
+
         bool IsMouseButtonPressed(MouseCode button) const;
+
+        bool IsMouseButtonHeld(MouseCode button) const;
+
+        bool IsMouseButtonReleased(MouseCode button) const;
+
         bool IsGamepadButtonPressed(GamepadCode button, int gamepadIndex = 0) const;
+
+        bool IsGamepadButtonHeld(GamepadCode button, int gamepadIndex = 0) const;
+
+        bool IsGamepadButtonReleased(GamepadCode button, int gamepadIndex = 0) const;
+
         float GetGamepadAxis(GamepadAxisCode axis, int gamepadIndex = 0) const;
 
         // Mouse & Cursor State
         Vec2f GetMousePosition() const;
+
         Vec2f GetGlobalMousePosition() const;
+
         Vec2f GetMouseDelta() const;
+
         Vec2f GetMouseScrollDelta() const;
+
         void SetCursorMode(CursorMode mode) const;
+
         void SetCursorPosition(float x, float y) const;
+
+        // Touch State
+        int GetTouchCount() const;
+        const TouchPoint* GetTouch(int index) const;
+        const TouchPoint* GetTouchByFingerID(Uint64 fingerID) const;
 
         // Text Input
         void StartTextInput() const;
+
         void StopTextInput() const;
+
         std::string GetInputText() const;
 
         // Binding Management
-        void BindAction(ActionID actionID, const InputChord& chord);
+        void BindAction(ActionID actionID, const InputChord &chord);
+
         void UnbindAction(ActionID actionID);
+
         void ClearAllBindings();
+
         bool IsActionBound(ActionID actionID) const;
 
         // Rumble
         void RumbleGamepad(int gamepadIndex, float lowFrequency, float highFrequency, Uint32 durationMs) const;
+
         void RumbleGamepadTriggers(int gamepadIndex, float leftRumble, float rightRumble, Uint32 durationMs) const;
+
         void StopGamepadRumble(int gamepadIndex) const;
 
     private:
@@ -68,23 +105,26 @@ namespace Engine {
         // Tracks physical device states
         std::unordered_map<KeyCode, InputState> m_keyStates;
         std::unordered_map<MouseCode, InputState> m_mouseStates;
-        
+
         // Gamepad index -> (GamepadCode -> State)
-        std::unordered_map<int, std::unordered_map<GamepadCode, InputState>> m_gamepadButtonStates;
-        std::unordered_map<int, std::unordered_map<GamepadAxisCode, float>> m_gamepadAxes;
-        
+        std::unordered_map<int, std::unordered_map<GamepadCode, InputState> > m_gamepadButtonStates;
+        std::unordered_map<int, std::unordered_map<GamepadAxisCode, float> > m_gamepadAxes;
+
         // Maps an ActionID to a list of chords (OR relationship between chords, AND within chord)
-        std::unordered_map<ActionID, std::vector<InputChord>> m_actionBindings;
+        std::unordered_map<ActionID, std::vector<InputChord> > m_actionBindings;
 
         // Tracks the resolved state of each ActionID per gamepad index
-        std::unordered_map<int, std::unordered_map<ActionID, InputState>> m_actionStates;
+        std::unordered_map<int, std::unordered_map<ActionID, InputState> > m_actionStates;
+
+        // Touch State
+        std::vector<TouchPoint> m_touches;
 
         // Mouse Delta Tracking
         float m_accumMouseDeltaX = 0.0f;
         float m_accumMouseDeltaY = 0.0f;
         float m_accumScrollX = 0.0f;
         float m_accumScrollY = 0.0f;
-        
+
         float m_mouseDeltaX = 0.0f;
         float m_mouseDeltaY = 0.0f;
         float m_scrollDeltaX = 0.0f;
@@ -94,22 +134,26 @@ namespace Engine {
         std::string m_accumInputText;
 
         // Opened SDL Gamepads
-        std::unordered_map<SDL_JoystickID, SDL_Gamepad*> m_gamepads;
+        std::unordered_map<SDL_JoystickID, SDL_Gamepad *> m_gamepads;
         std::unordered_map<SDL_JoystickID, int> m_joystickToGamepadIndex;
         int m_nextGamepadIndex = 0;
 
         void UpdateAccumulators();
-        void ClearStateTransitions();
-        void EvaluateActions();
-        
-        void AddGamepad(SDL_JoystickID joystickID);
-        void RemoveGamepad(SDL_JoystickID joystickID);
-        
-        InputState& GetKeyState(KeyCode key);
-        InputState& GetMouseState(MouseCode button);
-        InputState& GetGamepadButtonState(int index, GamepadCode button);
-    };
 
+        void ClearStateTransitions();
+
+        void EvaluateActions();
+
+        void AddGamepad(SDL_JoystickID joystickID);
+
+        void RemoveGamepad(SDL_JoystickID joystickID);
+
+        InputState &GetKeyState(KeyCode key);
+
+        InputState &GetMouseState(MouseCode button);
+
+        InputState &GetGamepadButtonState(int index, GamepadCode button);
+    };
 }
 
 #endif //ENGINE_INPUT_MANAGER_H

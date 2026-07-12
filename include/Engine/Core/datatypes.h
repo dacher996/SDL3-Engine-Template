@@ -83,6 +83,8 @@ namespace Engine {
 
         operator SDL_Point() const;
 
+        Vec2i operator*(const int &val) const;
+
         static const Vec2i ZERO;
         static const Vec2i ONE;
     };
@@ -92,6 +94,8 @@ namespace Engine {
 
         operator SDL_FPoint() const;
 
+        Vec2f operator*(const float &val) const;
+
         static const Vec2f ZERO;
         static const Vec2f ONE;
     };
@@ -99,12 +103,16 @@ namespace Engine {
     struct Vec3i : Vec3<int> {
         using Vec3<int>::Vec3;
 
+        Vec3i operator*(const int &val) const;
+
         static const Vec3i ZERO;
         static const Vec3i ONE;
     };
 
     struct Vec3f : Vec3<float> {
         using Vec3<float>::Vec3;
+
+        Vec3f operator*(const float &val) const;
 
         static const Vec3f ZERO;
         static const Vec3f ONE;

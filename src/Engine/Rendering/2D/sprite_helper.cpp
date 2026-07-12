@@ -6,31 +6,29 @@
 #include <format>
 
 namespace Engine {
-
     void PopulateSpriteEntry(
-            SpriteEntry &entry,
-            const Sprite &sprite,
-            const Position &pos,
-            const Size &size,
-            const TextureRegion &texRegion) {
-
+        SpriteEntry &entry,
+        const Sprite &sprite,
+        const Position &pos,
+        const Size &size,
+        const TextureRegion &texRegion) {
         entry.data.x = pos.x;
         entry.data.y = pos.y;
         entry.data.w = static_cast<float>(size.x);
         entry.data.h = static_cast<float>(size.y);
-        
-        entry.data.r = sprite.color.r;
-        entry.data.g = sprite.color.g;
-        entry.data.b = sprite.color.b;
-        entry.data.a = sprite.color.a;
-        
+
+        entry.data.r = static_cast<float>(sprite.color.r) / 255.0f;
+        entry.data.g = static_cast<float>(sprite.color.g) / 255.0f;
+        entry.data.b = static_cast<float>(sprite.color.b) / 255.0f;
+        entry.data.a = static_cast<float>(sprite.color.a) / 255.0f;
+
         entry.data.rotation = sprite.rotation;
-        
+
         entry.data.origin_x = sprite.origin.x;
         entry.data.origin_y = sprite.origin.y;
 
         entry.data.textureLayerId = static_cast<float>(texRegion.layerId);
-        
+
         entry.data.tex_x = texRegion.x;
         entry.data.tex_y = texRegion.y;
         entry.data.tex_w = texRegion.w;
@@ -50,21 +48,20 @@ namespace Engine {
     }
 
     SpriteSubmission GetSpriteSubmission(
-            Registry *registry,
-            Camera2D &camera,
-            const std::vector<Entity> &visibleEntities) {
-        
+        Registry *registry,
+        Camera2D &camera,
+        const std::vector<Entity> &visibleEntities) {
         SpriteSubmission submission;
         if (!registry) return submission;
 
         submission.entries.reserve(
             static_cast<size_t>(static_cast<float>(visibleEntities.size()) * 1.2f));
         submission.viewMatrix = camera.GetViewMatrix();
-        
+
         auto &regionManager = App::GetLayer<TextureRegionManager>();
         auto defaultMaterial = App::GetLayer<MaterialManager>().GetDefaultMaterial();
 
-        for (auto entityId : visibleEntities) {
+        for (auto entityId: visibleEntities) {
             const auto &pos = registry->get<Position>(entityId);
             const auto &size = registry->get<Size>(entityId);
             const auto &sprite = registry->get<Sprite>(entityId);
@@ -80,7 +77,7 @@ namespace Engine {
             // Entities with material components produce one entry per material
             if (const auto *materialComp = registry->try_get<MaterialComponent>(entityId);
                 materialComp && !materialComp->materialIds.empty()) {
-                for (auto mid : materialComp->materialIds) {
+                for (auto mid: materialComp->materialIds) {
                     entry.materialId = mid;
                     submission.entries.push_back(entry);
                 }
@@ -93,5 +90,4 @@ namespace Engine {
 
         return submission;
     }
-
 }
