@@ -2,6 +2,7 @@
 
 #include "Engine/Core/app.h"
 #include "Engine/Core/app_context.h"
+#include "Engine/Core/common_identifiers.h"
 #include "Engine/Core/logger.h"
 #include "Engine/Layers/graphics_pipeline_manager.h"
 #include "Engine/Layers/texture_sampler_manager.h"
@@ -57,9 +58,9 @@ namespace Engine {
     // Retrieve pipeline 1 (the texture-to-screen pipeline) from the graphics
     // pipeline manager.
     auto pipeline =
-        App::GetLayer<GraphicsPipelineManager>().GetPipeline(1);
+        App::GetLayer<GraphicsPipelineManager>().GetPipeline(SCALE_TEXTURE_TO_SCREEN_PIPELINE_ID);
     if (!pipeline) {
-      ENGINE_LOG_ERROR("Unable to get pipeline with id: 1");
+      ENGINE_LOG_ERROR("Unable to get pipeline with id: {0}", SCALE_TEXTURE_TO_SCREEN_PIPELINE_ID);
       SDL_EndGPURenderPass(renderPass);
       return false;
     }

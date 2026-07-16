@@ -48,7 +48,7 @@ struct SpriteData
 {
     float2 Position;
     float2 Scale;
-    float2 Padding;
+    float2 Origin;
     float Rotation;
     float TexId;
     float TexU;
@@ -89,16 +89,16 @@ vertex main0_out main0(constant type_UniformBlock& UniformBlock [[buffer(0)]], c
     main0_out out = {};
     uint _62 = gl_VertexIndex / 6u;
     uint _63 = gl_VertexIndex % 6u;
-    float _79 = DataBuffer._m0[IndexBuffer._m0[_62]].TexU + DataBuffer._m0[IndexBuffer._m0[_62]].TexW;
-    float _80 = DataBuffer._m0[IndexBuffer._m0[_62]].TexV + DataBuffer._m0[IndexBuffer._m0[_62]].TexH;
-    spvUnsafeArray<float2, 4> _85 = spvUnsafeArray<float2, 4>({ float2(DataBuffer._m0[IndexBuffer._m0[_62]].TexU, DataBuffer._m0[IndexBuffer._m0[_62]].TexV), float2(_79, DataBuffer._m0[IndexBuffer._m0[_62]].TexV), float2(DataBuffer._m0[IndexBuffer._m0[_62]].TexU, _80), float2(_79, _80) });
-    spvUnsafeArray<float2, 4> _60 = _85;
-    float _86 = cos(DataBuffer._m0[IndexBuffer._m0[_62]].Rotation);
-    float _87 = sin(DataBuffer._m0[IndexBuffer._m0[_62]].Rotation);
+    float _80 = DataBuffer._m0[IndexBuffer._m0[_62]].TexU + DataBuffer._m0[IndexBuffer._m0[_62]].TexW;
+    float _81 = DataBuffer._m0[IndexBuffer._m0[_62]].TexV + DataBuffer._m0[IndexBuffer._m0[_62]].TexH;
+    spvUnsafeArray<float2, 4> _86 = spvUnsafeArray<float2, 4>({ float2(DataBuffer._m0[IndexBuffer._m0[_62]].TexU, DataBuffer._m0[IndexBuffer._m0[_62]].TexV), float2(_80, DataBuffer._m0[IndexBuffer._m0[_62]].TexV), float2(DataBuffer._m0[IndexBuffer._m0[_62]].TexU, _81), float2(_80, _81) });
+    spvUnsafeArray<float2, 4> _60 = _86;
+    float _87 = cos(DataBuffer._m0[IndexBuffer._m0[_62]].Rotation);
+    float _88 = sin(DataBuffer._m0[IndexBuffer._m0[_62]].Rotation);
     out.out_var_TEXCOORD0 = uint(int(DataBuffer._m0[IndexBuffer._m0[_62]].TexId));
     out.out_var_TEXCOORD1 = _60[_53[_63]];
     out.out_var_TEXCOORD2 = DataBuffer._m0[IndexBuffer._m0[_62]].Color;
-    out.gl_Position = UniformBlock.ViewProjectionMatrix * float4((float2x2(float2(_86, _87), float2(-_87, _86)) * (_58[_53[_63]] * DataBuffer._m0[IndexBuffer._m0[_62]].Scale)) + DataBuffer._m0[IndexBuffer._m0[_62]].Position, 1.0, 1.0);
+    out.gl_Position = UniformBlock.ViewProjectionMatrix * float4((float2x2(float2(_87, _88), float2(-_88, _87)) * ((_58[_53[_63]] - DataBuffer._m0[IndexBuffer._m0[_62]].Origin) * DataBuffer._m0[IndexBuffer._m0[_62]].Scale)) + DataBuffer._m0[IndexBuffer._m0[_62]].Position, 1.0, 1.0);
     return out;
 }
 

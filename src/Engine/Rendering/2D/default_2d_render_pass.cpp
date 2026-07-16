@@ -62,7 +62,29 @@ namespace Engine {
           return false;
         }
 
-        auto pipeline = App::GetLayer<GraphicsPipelineManager>().GetPipeline(material->shaderId);
+        const auto *textureData = App::GetLayer<TextureManager>().GetTexture(material->textureId);
+        if (!textureData) {
+          ENGINE_LOG_SDL_ERROR("Invalid texture data. Make sure the texture is properly registered before using it.");
+          return false;
+        }
+
+        // If a material sits on the default/multilayered pipeline but its bound texture doesn't actually
+        // match (e.g. a single-layer texture on the array-sampling pipeline, or vice versa), swap to a
+        // corrected material rather than binding a mismatched pipeline/texture pair.
+        auto &pipelineManager = App::GetLayer<GraphicsPipelineManager>();
+        auto [defaultShaderId, multilayeredShaderId] = pipelineManager.GetDefaultPipeline();
+        Uint16 requiredShaderId = material->shaderId;
+        if (material->shaderId == defaultShaderId && textureData->layers > 1) {
+          requiredShaderId = multilayeredShaderId;
+        } else if (material->shaderId == multilayeredShaderId && textureData->layers <= 1) {
+          requiredShaderId = defaultShaderId;
+        }
+        if (requiredShaderId != material->shaderId) {
+          material = App::GetLayer<MaterialManager>().GetMaterial(
+            App::GetLayer<MaterialManager>().GetOrCreateMaterial(requiredShaderId, material->textureId));
+        }
+
+        auto pipeline = pipelineManager.GetPipeline(material->shaderId);
         if (!pipeline) {
           ENGINE_LOG_ERROR(std::format("Unable to get pipeline with id {}", material->shaderId));
           return false;
@@ -72,12 +94,6 @@ namespace Engine {
         /// Texture bindings are costly, so do it only when needed
         if (boundTextureId != material->textureId) {
           boundTextureId = material->textureId;
-          const auto textureData = App::GetLayer<TextureManager>().GetTexture(
-            static_cast<Uint16>(boundTextureId));
-          if (!textureData) {
-            ENGINE_LOG_SDL_ERROR("Invalid texture data. Make sure the texture is properly registered before using it.");
-            return false;
-          }
           std::array textureSamplerBindings{
             SDL_GPUTextureSamplerBinding{
               .texture = textureData->texture,

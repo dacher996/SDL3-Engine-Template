@@ -16,12 +16,13 @@ namespace Engine {
     m_pipelines.clear();
   }
 
-  void GraphicsPipelineManager::SetDefaultPipeline(Uint16 id) {
-    m_defaultPipelineId = id;
+  void GraphicsPipelineManager::SetDefaultPipeline(Uint16 defaultId, Uint16 multilayeredId) {
+    m_defaultPipelineId = defaultId;
+    m_multilayeredPipelineId = multilayeredId;
   }
 
-  SDL_GPUGraphicsPipeline *GraphicsPipelineManager::GetDefaultPipeline() {
-    return GetPipeline(m_defaultPipelineId);
+  std::pair<Uint16, Uint16> GraphicsPipelineManager::GetDefaultPipeline() const {
+    return {m_defaultPipelineId, m_multilayeredPipelineId};
   }
 
   SDL_GPUShader *GraphicsPipelineManager::LoadShader(const std::string &shaderFilename, Uint32 samplerCount,

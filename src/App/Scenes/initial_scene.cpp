@@ -4,6 +4,7 @@
 #include "App/Scenes/scene_2d.h"
 #include "Engine/Core/app.h"
 #include "Engine/Core/app_context.h"
+#include "Engine/Core/common_identifiers.h"
 #include "Engine/Core/logger.h"
 #include "Engine/Layers/graphics_pipeline_manager.h"
 #include "Engine/Layers/material_manager.h"
@@ -55,24 +56,30 @@ namespace YourProject {
         // Set the id of the pixel region for primitive drawing
         App::GetLayer<TextureRegionManager>().SetPixelRegion(m_defaultPixelRegion);
 
-        /// Sets the default (fallback) pipeline
-        App::GetLayer<GraphicsPipelineManager>().SetDefaultPipeline(m_defaultGraphicsPipeline);
+        /// Sets the default (fallback) pipeline pair, used to auto-select between single-texture and
+        /// texture-array sampling depending on what a material's bound texture actually is
+        App::GetLayer<GraphicsPipelineManager>().SetDefaultPipeline(
+            DEFAULT_PIPELINE_ID, DEFAULT_MULTILAYERED_PIPELINE_ID);
 
-        // Create the default material (ID 0) which uses the default pipeline (ID 0)
-        // and the main atlas (ID 0)
+        // Create the default material which uses the default pipeline and the main atlas
         App::GetLayer<MaterialManager>().SetDefaultMaterial(
-            App::GetLayer<MaterialManager>().CreateMaterial(m_defaultGraphicsPipeline, m_defaultTextureId));
+            App::GetLayer<MaterialManager>().CreateMaterial(DEFAULT_PIPELINE_ID, m_defaultTextureId)
+        );
+
+        // Upfront create the material for the multilayered pipeline as well
+        App::GetLayer<MaterialManager>().CreateMaterial(DEFAULT_MULTILAYERED_PIPELINE_ID, m_defaultTextureId);
     }
 
     bool InitialScene::LoadShaders() {
-        constexpr Uint16 texToScreenPipelineId = 1;
-
         // Load necessary shaders
         auto vertShader{
             GraphicsPipelineManager::LoadShader("Default.vert", 0, 1, 2, 0)
         };
         auto fragShader{
             GraphicsPipelineManager::LoadShader("Default.frag", 1, 0, 0, 0)
+        };
+        auto multilayeredFragShader{
+            GraphicsPipelineManager::LoadShader("DefaultLayeredTexture.frag", 1, 0, 0, 0)
         };
         auto screenVertShader{
             GraphicsPipelineManager::LoadShader("TextureToScreen.vert", 0, 1, 0, 0)
@@ -81,7 +88,7 @@ namespace YourProject {
             GraphicsPipelineManager::LoadShader("TextureToScreen.frag", 1, 0, 0, 0)
         };
 
-        if (!vertShader || !fragShader || !screenVertShader || !screenFragShader) {
+        if (!vertShader || !fragShader || !multilayeredFragShader || !screenVertShader || !screenFragShader) {
             ENGINE_LOG_SDL_ERROR("Unable to load default shaders.");
             return false;
         }
@@ -90,6 +97,13 @@ namespace YourProject {
             vertShader, fragShader, GraphicsPipelineCreationInfo{});
         if (!defaultPipeline) {
             ENGINE_LOG_SDL_ERROR("Unable to create graphics pipeline: default.");
+            return false;
+        }
+
+        auto defaultMultilayeredPipeline = GraphicsPipelineManager::CreateGraphicsPipeline(
+            vertShader, multilayeredFragShader, GraphicsPipelineCreationInfo{});
+        if (!defaultMultilayeredPipeline) {
+            ENGINE_LOG_SDL_ERROR("Unable to create graphics pipeline: default multilayered.");
             return false;
         }
 
@@ -104,13 +118,14 @@ namespace YourProject {
 
         // Register pipelines
         auto &pipelineManager = App::GetLayer<GraphicsPipelineManager>();
-        pipelineManager.RegisterPipeline(m_defaultGraphicsPipeline, defaultPipeline);
-        pipelineManager.RegisterPipeline(texToScreenPipelineId,
-                                         textureToScreenPipeline);
+        pipelineManager.RegisterPipeline(DEFAULT_PIPELINE_ID, defaultPipeline);
+        pipelineManager.RegisterPipeline(DEFAULT_MULTILAYERED_PIPELINE_ID, defaultMultilayeredPipeline);
+        pipelineManager.RegisterPipeline(SCALE_TEXTURE_TO_SCREEN_PIPELINE_ID, textureToScreenPipeline);
 
         // Free up unused shaders
         GraphicsPipelineManager::UnloadShader(vertShader);
         GraphicsPipelineManager::UnloadShader(fragShader);
+        GraphicsPipelineManager::UnloadShader(multilayeredFragShader);
         GraphicsPipelineManager::UnloadShader(screenVertShader);
         GraphicsPipelineManager::UnloadShader(screenFragShader);
 

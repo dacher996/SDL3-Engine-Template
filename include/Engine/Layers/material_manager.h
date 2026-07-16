@@ -53,6 +53,12 @@ namespace Engine {
     /// Creates a material from a graphics pipeline and a texture region
     Uint16 CreateMaterialFromRegion(Uint16 shaderId, Uint32 textureRegionId);
 
+    /// Retrieves the material for a given shader/texture combination, creating and registering a new one the
+    /// first time that combination is requested. Used to lazily materialize a "corrected" variant of a material
+    /// (e.g. when Default2DRenderPass swaps a material to the pipeline that actually matches its bound texture)
+    /// without allocating a new material on every frame.
+    Uint16 GetOrCreateMaterial(Uint16 shaderId, Uint16 textureId);
+
     /// Retrieves a material via an id
     Material *GetMaterial(Uint16 id);
 
@@ -72,6 +78,10 @@ namespace Engine {
 
   private:
     std::unordered_map<Uint16, std::unique_ptr<Material> > m_materials;
+
+    /// Caches materials handed out by GetOrCreateMaterial, keyed by (shaderId << 16) | textureId
+    std::unordered_map<Uint32, Uint16> m_materialCache;
+
     Uint16 m_nextId{0};
     Uint16 m_defaultMaterialId{0};
   };

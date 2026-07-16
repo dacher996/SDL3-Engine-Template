@@ -3,6 +3,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <utility>
 
 #include "Engine/Rendering/graphics_pipeline_creation_info.h"
 #include "SDL3/SDL_gpu.h"
@@ -26,11 +27,13 @@ namespace Engine {
         /// Frees all pipelines from memory
         void Cleanup();
 
-        /// Sets the default graphics pipeline
-        void SetDefaultPipeline(Uint16 id);
+        /// Sets the default (single-texture) and default-multilayered (texture-array) pipeline ids. These are
+        /// tracked as a pair so Default2DRenderPass can pick whichever of the two actually matches a draw's
+        /// bound texture, correcting a mismatched material in either direction.
+        void SetDefaultPipeline(Uint16 defaultId, Uint16 multilayeredId);
 
-        /// Retrieves the default graphics pipeline
-        SDL_GPUGraphicsPipeline *GetDefaultPipeline();
+        /// Retrieves the {default, multilayered} pipeline id pair set via SetDefaultPipeline
+        [[nodiscard]] std::pair<Uint16, Uint16> GetDefaultPipeline() const;
 
         /// Loads a shader from file and returns a pointer to it.
         static SDL_GPUShader *LoadShader(const std::string &shaderFilename,
@@ -49,6 +52,7 @@ namespace Engine {
     private:
         std::unordered_map<Uint16, SDL_GPUGraphicsPipeline *> m_pipelines;
         Uint16 m_defaultPipelineId{0};
+        Uint16 m_multilayeredPipelineId{0};
     };
 }
 

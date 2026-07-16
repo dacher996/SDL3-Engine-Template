@@ -20,6 +20,18 @@ namespace Engine {
         return CreateMaterial(shaderId, region->textureId);
     }
 
+    Uint16 MaterialManager::GetOrCreateMaterial(Uint16 shaderId, Uint16 textureId) {
+        Uint32 key = (static_cast<Uint32>(shaderId) << 16) | textureId;
+        auto it = m_materialCache.find(key);
+        if (it != m_materialCache.end()) {
+            return it->second;
+        }
+
+        Uint16 newId = CreateMaterial(shaderId, textureId);
+        m_materialCache[key] = newId;
+        return newId;
+    }
+
     Material *MaterialManager::GetMaterial(Uint16 id) {
         auto it = m_materials.find(id);
         if (it != m_materials.end()) {
@@ -37,6 +49,7 @@ namespace Engine {
             }
             m_materials.erase(it);
         }
+        std::erase_if(m_materialCache, [id](const auto &entry) { return entry.second == id; });
     }
 
     void MaterialManager::Cleanup() {
@@ -47,6 +60,7 @@ namespace Engine {
             }
         }
         m_materials.clear();
+        m_materialCache.clear();
     }
 
     void MaterialManager::SetDefaultMaterial(Uint16 id) {

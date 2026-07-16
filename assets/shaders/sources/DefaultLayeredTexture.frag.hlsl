@@ -1,4 +1,4 @@
-Texture2D<float4> Texture : register(t0, space2);
+Texture2DArray<float4> Texture : register(t0, space2);
 SamplerState Sampler : register(s0, space2);
 
 struct Input
@@ -10,5 +10,5 @@ struct Input
 
 float4 main(Input input) : SV_Target0
 {
-    return input.Color * Texture.Sample(Sampler, input.TexCoord);
+    return input.Color * Texture.Sample(Sampler, float3(input.TexCoord, float(input.TexId)));
 }

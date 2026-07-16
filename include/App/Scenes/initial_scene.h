@@ -10,7 +10,7 @@ namespace YourProject {
 
         void Render() override;
 
-        void OnEvent(Engine::AppEvent& event) override;
+        void OnEvent(Engine::AppEvent &event) override;
 
         void OnDestroy() override;
 
@@ -23,7 +23,6 @@ namespace YourProject {
 
         bool m_ranOnce{false};
         Uint16 m_defaultTextureId{0};
-        Uint16 m_defaultGraphicsPipeline{0};
         Uint16 m_defaultPixelRegion{0};
     };
 }

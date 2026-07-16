@@ -120,7 +120,7 @@ namespace Engine {
       std::ranges::copy(rawPixelsSpan, destIterator);
       SDL_DestroySurface(surface);
 
-      destIterator += rowSizeInBytes;
+      destIterator += rawPixelsSpan.size();
       ++i;
 
       if (i >= files.size())
@@ -165,7 +165,7 @@ namespace Engine {
         };
 
     SDL_GPUTextureCreateInfo textureCreateInfo{
-      .type = SDL_GPU_TEXTURETYPE_2D_ARRAY,
+      .type = layerCount > 1 ? SDL_GPU_TEXTURETYPE_2D_ARRAY : SDL_GPU_TEXTURETYPE_2D,
       .format = SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM,
       .usage = SDL_GPU_TEXTUREUSAGE_SAMPLER,
       .width = data->width,
