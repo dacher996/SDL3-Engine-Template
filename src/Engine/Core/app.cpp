@@ -44,8 +44,10 @@ SDL_AppResult Engine::App::Init() {
     m_gpuDevice.reset(SDL_CreateGPUDevice(
         SDL_GPU_SHADERFORMAT_METALLIB | SDL_GPU_SHADERFORMAT_MSL | SDL_GPU_SHADERFORMAT_DXIL |
         SDL_GPU_SHADERFORMAT_SPIRV, true, nullptr));
+    // Create the window hidden so nothing flashes on screen while the initial scene loads assets.
+    // It is shown (which also activates and focuses it) once loading has finished.
     m_window.reset(SDL_CreateWindow(APP_NAME, appContext.windowWidth, appContext.windowHeight,
-                                    SDL_WINDOW_RESIZABLE));
+                                    SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN));
 
     if (m_gpuDevice == nullptr || m_window == nullptr ||
         !SDL_ClaimWindowForGPUDevice(m_gpuDevice.get(), m_window.get())) {

@@ -33,8 +33,13 @@ namespace YourProject {
 
         SetDefaults();
 
-        // Request window focus
-        SDL_RaiseWindow(App::GetLayer<AppContext>().window);
+        // Everything has finished loading, so reveal the window. Showing it makes it visible and key,
+        // then raising it activates the whole application (SDL only calls activateIgnoringOtherApps on
+        // raise, and only once the window is already visible), which brings it to the foreground over
+        // whatever launched it (e.g. the terminal or IDE) instead of leaving it stuck behind.
+        SDL_Window *window = App::GetLayer<AppContext>().window;
+        SDL_ShowWindow(window);
+        SDL_RaiseWindow(window);
 
         // Go to next scene after everything has finished loading
         App::GetLayer<SceneManager>().ReplaceScene(new Scene2D());
